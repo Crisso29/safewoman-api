@@ -1,0 +1,145 @@
+@model IReadOnlyList<SafeWoman.Application.DTOs.Admin.AdminVictimaDto>
+@{ ViewBag.Title = "Víctimas"; }
+
+@section Styles {
+<style>
+.sw-verified { color: #22c55e; font-size: .95rem; }
+.sw-unverified { color: #f59e0b; font-size: .95rem; }
+</style>
+}
+
+<!-- Header -->
+<div class="d-flex align-items-end justify-content-between mb-4">
+    <div>
+        <h1 style="font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.02em">Víctimas</h1>
+        <p style="font-size:13px;color:#6B7280;margin:0">@Model.Count usuaria@(Model.Count != 1 ? "s" : "") registradas en el sistema</p>
+    </div>
+    <div class="sw-search">
+        <i class="bi bi-search"></i>
+        <input type="text" id="sw-filter" placeholder="Buscar por nombre o DNI…" oninput="filterVictimas(this.value)">
+    </div>
+</div>
+
+<!-- Mini stats -->
+<div class="row g-2 mb-3">
+    <div class="col-auto">
+        <div class="d-flex align-items-center gap-2 px-3 py-2 bg-white rounded-3 border" style="border-color:rgba(0,0,0,.06)!important;font-size:.8rem">
+            <i class="bi bi-people-fill" style="color:#8B1A3A"></i>
+            <span class="fw-semibold">@Model.Count</span>
+            <span class="text-secondary">total</span>
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="d-flex align-items-center gap-2 px-3 py-2 bg-white rounded-3 border" style="border-color:rgba(0,0,0,.06)!important;font-size:.8rem">
+            <i class="bi bi-patch-check-fill sw-verified"></i>
+            <span class="fw-semibold">@Model.Count(v => v.Verificada)</span>
+            <span class="text-secondary">verificadas</span>
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="d-flex align-items-center gap-2 px-3 py-2 bg-white rounded-3 border" style="border-color:rgba(0,0,0,.06)!important;font-size:.8rem">
+            <i class="bi bi-circle-fill" style="color:#22c55e;font-size:.5rem"></i>
+            <span class="fw-semibold">@Model.Count(v => v.Activa)</span>
+            <span class="text-secondary">activas</span>
+        </div>
+    </div>
+</div>
+
+<div class="sw-card">
+    <div class="table-responsive">
+        <table class="sw-table">
+            <thead>
+                <tr>
+                    <th>Usuaria</th>
+                    <th>DNI</th>
+                    <th>Teléfono</th>
+                    <th>Registro</th>
+                    <th>Verif.</th>
+                    <th class="text-center">Alertas</th>
+                    <th class="text-center">Denuncias</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="victimas-body">
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="9">
+                        <div class="sw-empty">
+                            <div class="sw-empty-icon"><i class="bi bi-person-plus"></i></div>
+                            <div class="fw-semibold" style="color:#374151">Sin registros</div>
+                            <p>Aún no hay víctimas registradas en el sistema.</p>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @foreach (var v in Model)
+            {
+                <tr class="sw-victim-row" data-name="@(v.NombreCompleto.ToLower()) @(v.Dni.ToLower())">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="sw-avt"
+                                 style="width:34px;height:34px;font-size:.78rem;flex-shrink:0;
+                                        background:@(v.Activa ? "#fde8ec" : "#f3f4f6");
+                                        color:@(v.Activa ? "#8B1A3A" : "#9ca3af")">
+                                @(v.NombreCompleto.Length > 0 ? v.NombreCompleto[0].ToString().ToUpper() : "V")
+                            </div>
+                            <div>
+                                <div class="fw-semibold" style="font-size:.84rem;@(!v.Activa ? "color:#9ca3af" : "")">
+                                    @v.NombreCompleto
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-size:.8rem;color:#6b7280;font-variant-numeric:tabular-nums">@v.Dni</td>
+                    <td style="font-size:.8rem;color:#6b7280">@v.Telefono</td>
+                    <td style="font-size:.78rem;color:#9ca3af;white-space:nowrap">
+                        @v.FechaRegistro.ToLocalTime().ToString("dd/MM/yyyy")
+                    </td>
+                    <td class="text-center">
+                        @if (v.Verificada)
+                        { <i class="bi bi-patch-check-fill sw-verified" title="Verificada"></i> }
+                        else
+                        { <i class="bi bi-clock sw-unverified" title="Pendiente"></i> }
+                    </td>
+                    <td class="text-center">
+                        <span class="fw-semibold" style="font-size:.85rem">@v.TotalAlertas</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="fw-semibold" style="font-size:.85rem">@v.TotalDenuncias</span>
+                    </td>
+                    <td>
+                        <span class="sw-badge @(v.Activa ? "sw-badge-activo" : "sw-badge-inactivo")">
+                            <span class="sw-dot"></span>
+                            @(v.Activa ? "Activa" : "Inactiva")
+                        </span>
+                    </td>
+                    <td>
+                        <form asp-action="Toggle" asp-controller="Victimas" asp-area="Admin" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id"     value="@v.IdVictima" />
+                            <input type="hidden" name="activar" value="@(!v.Activa ? "true" : "false")" />
+                            <button type="submit"
+                                    class="sw-toggle-btn @(v.Activa ? "desactivar" : "activar")">
+                                <i class="bi @(v.Activa ? "bi-person-slash" : "bi-person-check")"></i>
+                                @(v.Activa ? "Desactivar" : "Activar")
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function filterVictimas(q) {
+    const rows = document.querySelectorAll('#victimas-body tr[data-name]');
+    q = q.toLowerCase().trim();
+    rows.forEach(r => r.style.display = !q || r.dataset.name.includes(q) ? '' : 'none');
+}
+</script>
+}

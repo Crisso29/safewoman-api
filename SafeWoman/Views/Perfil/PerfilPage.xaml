@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SafeWoman.Views.Perfil.PerfilPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header con gradiente -->
+        <Grid Grid.Row="0" Padding="16,48,16,28">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#8B1A3A" Offset="0"/>
+                    <GradientStop Color="#A02040" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <VerticalStackLayout Spacing="0">
+                <!-- Fila botón volver -->
+                <Grid ColumnDefinitions="Auto,*" Margin="0,0,0,20">
+                    <Button Grid.Column="0" Text="←" BackgroundColor="#33FFFFFF" TextColor="White"
+                            FontSize="18" WidthRequest="40" HeightRequest="40" CornerRadius="20"
+                            Command="{Binding VolverCommand}" />
+                    <Label Grid.Column="1" Text="Mi perfil" TextColor="White"
+                           FontSize="17" FontAttributes="Bold"
+                           VerticalOptions="Center" Margin="16,0,0,0" />
+                </Grid>
+                <!-- Avatar + nombre centrado -->
+                <Border WidthRequest="72" HeightRequest="72" StrokeShape="RoundRectangle 36"
+                        BackgroundColor="#44FFFFFF" Stroke="#44FFFFFF" HorizontalOptions="Center"
+                        Margin="0,0,0,12">
+                    <Label Text="{Binding Iniciales}" FontSize="26" FontAttributes="Bold"
+                           TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
+                <Label Text="{Binding NombreCompleto}" FontSize="18" FontAttributes="Bold"
+                       TextColor="White" HorizontalOptions="Center" Margin="0,0,0,4"/>
+                <Label Text="Ayacucho · Protegida" FontSize="12" TextColor="#CCFFFFFF"
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Grid>
+
+        <ScrollView Grid.Row="1" BackgroundColor="{StaticResource BgSec}">
+            <VerticalStackLayout Padding="16,20" Spacing="12">
+
+                <!-- Datos personales -->
+                <Border BackgroundColor="White" Stroke="{StaticResource Border}"
+                        StrokeShape="RoundRectangle 16" Padding="20">
+                    <VerticalStackLayout Spacing="0">
+
+                        <Label Text="DATOS PERSONALES" FontSize="10" FontAttributes="Bold"
+                               TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"
+                               Margin="0,0,0,16"/>
+
+                        <VerticalStackLayout Spacing="4" Margin="0,0,0,14">
+                            <Label Text="Nombre completo" FontSize="11"
+                                   TextColor="{StaticResource TextMuted}"/>
+                            <Label Text="{Binding NombreCompleto}" FontSize="15" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMain}"/>
+                        </VerticalStackLayout>
+
+                        <BoxView HeightRequest="1" Color="{StaticResource Border}" Margin="0,0,0,14"/>
+
+                        <VerticalStackLayout Spacing="4" Margin="0,0,0,14">
+                            <Label Text="DNI" FontSize="11" TextColor="{StaticResource TextMuted}"/>
+                            <Label Text="{Binding Dni}" FontSize="15" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMain}"/>
+                        </VerticalStackLayout>
+
+                        <BoxView HeightRequest="1" Color="{StaticResource Border}" Margin="0,0,0,14"/>
+
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Celular" FontSize="11" TextColor="{StaticResource TextMuted}"/>
+                            <Label Text="{Binding Telefono}" FontSize="15" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMain}"/>
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Sección cerrar sesión -->
+                <Border BackgroundColor="#FFF5F5" Stroke="#FFCDD2"
+                        StrokeShape="RoundRectangle 16" Padding="20">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="¿Deseas cerrar sesión?" FontSize="14" FontAttributes="Bold"
+                               TextColor="#C62828"/>
+                        <Label Text="Se cerrará tu sesión actual. Podrás volver a ingresar cuando lo necesites."
+                               FontSize="12" TextColor="#B71C1C" LineHeight="1.5"/>
+                        <Button Text="Cerrar sesión"
+                                Command="{Binding CerrarSesionCommand}"
+                                BackgroundColor="#E53935"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CornerRadius="10"
+                                HeightRequest="48"/>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

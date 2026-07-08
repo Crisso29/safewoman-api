@@ -1,0 +1,6 @@
+@SafeWoman.API_HostAddress = http://localhost:5015
+
+GET {{SafeWoman.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

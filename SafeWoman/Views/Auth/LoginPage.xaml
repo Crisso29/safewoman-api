@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SafeWoman.Views.Auth.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Shell.NavBarIsVisible="False">
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#8B1A3A" Offset="0" />
+                <GradientStop Color="#6B0F2A" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <ScrollView>
+            <VerticalStackLayout Padding="28,64,28,40" Spacing="0" VerticalOptions="Center">
+
+                <!-- Logo + título -->
+                <Image
+                    Source="logo_shield.svg"
+                    WidthRequest="80"
+                    HeightRequest="88"
+                    HorizontalOptions="Center"
+                    Aspect="AspectFit"
+                    Margin="0,0,0,14" />
+
+                <Label Text="SafeWoman" FontSize="26" FontAttributes="Bold" TextColor="White"
+                       HorizontalOptions="Center" Margin="0,0,0,4" />
+                <Label Text="Bienvenida de regreso" FontSize="14" TextColor="#CCffffff"
+                       HorizontalOptions="Center" Margin="0,0,0,32" />
+
+                <!-- Card del formulario -->
+                <Border
+                    BackgroundColor="White"
+                    StrokeShape="RoundRectangle 20"
+                    Stroke="Transparent"
+                    Padding="24,28"
+                    Margin="0,0,0,20">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Radius="10" Opacity="0.12" Offset="0,4"/>
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="18">
+
+                        <Label Text="Iniciar sesión" FontSize="18" FontAttributes="Bold"
+                               TextColor="{StaticResource BrandDark}" Margin="0,0,0,4"/>
+
+                        <!-- Campo celular/DNI -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="CELULAR O DNI" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="{StaticResource BgSec}" Padding="2,0">
+                                <Entry Text="{Binding Identificador}"
+                                       Placeholder="Ej. 999 000 111 o 47291034"
+                                       Keyboard="Numeric" MaxLength="9"
+                                       BackgroundColor="Transparent"
+                                       TextColor="{StaticResource TextMain}"
+                                       PlaceholderColor="#BBBBBB"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Campo contraseña -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="CONTRASEÑA" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="{StaticResource BgSec}" Padding="2,0">
+                                <Entry Text="{Binding Password}"
+                                       IsPassword="True"
+                                       Placeholder="••••••••"
+                                       BackgroundColor="Transparent"
+                                       TextColor="{StaticResource TextMain}"
+                                       PlaceholderColor="#BBBBBB"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Error -->
+                        <Label Text="{Binding ErrorMessage}"
+                               TextColor="{StaticResource SosRed}"
+                               FontSize="13"
+                               HorizontalOptions="Center"
+                               IsVisible="{Binding ErrorMessage, Converter={x:StaticResource StringNotEmptyConverter}}"/>
+
+                        <!-- Botón ingresar -->
+                        <Button Text="Ingresar"
+                                Command="{Binding LoginCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={x:StaticResource InvertBoolConverter}}"
+                                BackgroundColor="{StaticResource BrandPrimary}"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CornerRadius="12"
+                                HeightRequest="52"
+                                Margin="0,4,0,0"/>
+
+                        <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource BrandPrimary}"
+                                           IsVisible="{Binding IsBusy}" Margin="0,4,0,0"/>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Link crear cuenta -->
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
+                    <Label Text="¿No tienes cuenta?" FontSize="13" TextColor="#CCffffff" VerticalOptions="Center"/>
+                    <Button Text="Crear cuenta"
+                            Command="{Binding IrARegistroCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="White"
+                            FontAttributes="Bold"
+                            FontSize="13"
+                            Padding="4,0"/>
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

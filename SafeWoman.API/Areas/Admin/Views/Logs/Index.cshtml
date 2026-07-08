@@ -1,0 +1,121 @@
+@model IReadOnlyList<SafeWoman.Application.DTOs.Admin.AdminLogDto>
+@{ ViewBag.Title = "Auditoría"; }
+
+@section Styles {
+<style>
+/* Acción badges */
+.sw-action-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .22rem .6rem; border-radius: 6px;
+    font-size: .7rem; font-weight: 700; letter-spacing: .3px;
+    text-transform: uppercase;
+}
+.sw-action-cambioestado { background: #eff6ff; color: #1d4ed8; }
+.sw-action-toggle       { background: #f0fdf4; color: #15803d; }
+.sw-action-login        { background: #f5f3ff; color: #7c3aed; }
+.sw-action-logout       { background: #fef9f0; color: #92400e; }
+.sw-action-default      { background: #f4f5f7; color: #6b7280; }
+
+/* Timeline dot */
+.sw-tl-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #e5e7eb; border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #e5e7eb;
+    flex-shrink: 0; margin-top: 4px;
+}
+</style>
+}
+
+<!-- Header -->
+<div class="d-flex align-items-end justify-content-between mb-4">
+    <div>
+        <h1 style="font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.02em">Auditoría</h1>
+        <p style="font-size:13px;color:#6B7280;margin:0">Últimos @Model.Count registros de actividad</p>
+    </div>
+    <div class="sw-search">
+        <i class="bi bi-search"></i>
+        <input type="text" id="sw-filter" placeholder="Buscar acción o admin…" oninput="filterLogs(this.value)">
+    </div>
+</div>
+
+<div class="sw-card">
+    <div class="table-responsive">
+        <table class="sw-table">
+            <thead>
+                <tr>
+                    <th>Fecha y hora</th>
+                    <th>Administrador</th>
+                    <th>Acción</th>
+                    <th>Entidad</th>
+                    <th>ID</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody id="logs-body">
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="6">
+                        <div class="sw-empty">
+                            <div class="sw-empty-icon"><i class="bi bi-journal"></i></div>
+                            <div class="fw-semibold" style="color:#374151">Sin registros de auditoría</div>
+                            <p>Las acciones del sistema aparecerán aquí.</p>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @foreach (var l in Model)
+            {
+                var accionKey = (l.Accion ?? "default").ToLower().Replace(" ","");
+                var accionClass = accionKey switch {
+                    "cambioestado"  => "sw-action-cambioestado",
+                    "toggle"        => "sw-action-toggle",
+                    "login"         => "sw-action-login",
+                    "logout"        => "sw-action-logout",
+                    _               => "sw-action-default"
+                };
+                <tr class="sw-log-row" data-name="@((l.NombreAdmin ?? "sistema").ToLower()) @((l.Accion ?? "").ToLower())">
+                    <td style="white-space:nowrap">
+                        <div style="font-size:.82rem;font-weight:600;color:#374151">
+                            @l.Timestamp.ToLocalTime().ToString("dd/MM/yyyy")
+                        </div>
+                        <div style="font-size:.75rem;color:#9ca3af">
+                            @l.Timestamp.ToLocalTime().ToString("HH:mm:ss")
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="sw-avt" style="width:26px;height:26px;background:#f3f4f6;font-size:.65rem;color:#6b7280">
+                                @((l.NombreAdmin ?? "S").Length > 0 ? (l.NombreAdmin ?? "S")[0].ToString().ToUpper() : "S")
+                            </div>
+                            <span style="font-size:.82rem;font-weight:500">@(l.NombreAdmin ?? "Sistema")</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="sw-action-badge @accionClass">@(l.Accion ?? "—")</span>
+                    </td>
+                    <td style="font-size:.8rem;color:#6b7280">@(l.EntidadAfectada ?? "—")</td>
+                    <td style="font-size:.78rem;color:#9ca3af;font-variant-numeric:tabular-nums">
+                        @(l.IdEntidadAfectada?.ToString() ?? "—")
+                    </td>
+                    <td style="font-size:.8rem;color:#6b7280;max-width:240px">
+                        <span class="d-block text-truncate" title="@(l.Descripcion ?? "")">
+                            @(l.Descripcion ?? "—")
+                        </span>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function filterLogs(q) {
+    const rows = document.querySelectorAll('#logs-body tr[data-name]');
+    q = q.toLowerCase().trim();
+    rows.forEach(r => r.style.display = !q || r.dataset.name.includes(q) ? '' : 'none');
+}
+</script>
+}

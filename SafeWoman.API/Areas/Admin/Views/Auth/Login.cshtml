@@ -1,0 +1,205 @@
+@model SafeWoman.Application.DTOs.Admin.AdminLoginRequest
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SafeWoman — Acceso Administrador</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #8B1A3A;
+            display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+            position: relative; overflow: hidden;
+        }
+
+        /* Ambient decorations */
+        .sw-amb-a {
+            position: absolute; top: -240px; left: -240px;
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(255,255,255,0.07), transparent 65%);
+            border-radius: 50%; pointer-events: none;
+            animation: swDriftA 16s ease-in-out infinite;
+        }
+        .sw-amb-b {
+            position: absolute; bottom: -260px; right: -260px;
+            width: 720px; height: 720px;
+            background: radial-gradient(circle, rgba(0,0,0,0.30), transparent 70%);
+            border-radius: 50%; pointer-events: none;
+            animation: swDriftB 18s ease-in-out infinite;
+        }
+        .sw-grid-bg {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 32px 32px; pointer-events: none; opacity: 0.5;
+        }
+        .sw-particle {
+            position: absolute; bottom: -10px;
+            background: rgba(255,255,255,0.45); border-radius: 50%; pointer-events: none;
+            animation: swFloatUp 11s ease-out infinite;
+        }
+
+        @@keyframes swDriftA { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(90px,70px) scale(1.08)} }
+        @@keyframes swDriftB { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-80px,-50px) scale(1.1)} }
+        @@keyframes swFloatUp {
+            0%  {transform:translate(0,0) scale(0.6);opacity:0}
+            10% {opacity:0.6}
+            90% {opacity:0.3}
+            100%{transform:translate(0,-100vh) scale(0.8);opacity:0}
+        }
+        @@keyframes swLogoHalo {
+            0%   {box-shadow:0 10px 24px rgba(139,26,58,0.32),inset 0 1px 0 rgba(255,255,255,0.18),0 0 0 0 rgba(255,255,255,0.55)}
+            70%  {box-shadow:0 10px 24px rgba(139,26,58,0.32),inset 0 1px 0 rgba(255,255,255,0.18),0 0 0 18px rgba(255,255,255,0)}
+            100% {box-shadow:0 10px 24px rgba(139,26,58,0.32),inset 0 1px 0 rgba(255,255,255,0.18),0 0 0 0 rgba(255,255,255,0)}
+        }
+
+        /* Card */
+        .sw-login-card {
+            width: 100%;
+            background: #fff; border-radius: 16px;
+            padding: 40px 36px 32px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.32), 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .sw-logo-wrap {
+            width: 60px; height: 60px; border-radius: 18px; background: #8B1A3A;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px;
+            animation: swLogoHalo 2.2s ease-out infinite;
+        }
+        .sw-login-title  { font-size: 26px; font-weight: 700; letter-spacing: -0.025em; color: #1A1A1A; text-align: center; margin-bottom: 4px; }
+        .sw-login-sub    { font-size: 12px; color: #6B7280; text-align: center; letter-spacing: 0.01em; margin-bottom: 28px; }
+
+        /* Fields */
+        .sw-field-label  { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        .sw-field-wrap   { position: relative; margin-bottom: 14px; }
+        .sw-field-icon   { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9CA3AF; display: flex; pointer-events: none; }
+        .sw-field-input  {
+            width: 100%; padding: 11px 14px 11px 40px;
+            border: 1.5px solid #E5E7EB; border-radius: 10px;
+            font-size: 14px; font-family: inherit; color: #1A1A1A; background: #fff;
+            transition: border-color .15s, box-shadow .15s; outline: none;
+        }
+        .sw-field-input:focus { border-color: #8B1A3A; box-shadow: 0 0 0 3px rgba(139,26,58,0.1); }
+        .sw-field-input::placeholder { color: #9CA3AF; }
+        .sw-pwd-toggle {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; padding: 4px; color: #9CA3AF;
+            cursor: pointer; display: flex; border-radius: 4px; transition: color .15s;
+        }
+        .sw-pwd-toggle:hover { color: #6B7280; }
+
+        /* Button */
+        .sw-login-btn {
+            width: 100%; padding: 12px; background: #8B1A3A; color: #fff;
+            border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+            font-family: inherit; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background .15s, transform .1s;
+            box-shadow: 0 4px 12px rgba(139,26,58,0.3); margin-top: 8px;
+        }
+        .sw-login-btn:hover  { background: #A52050; transform: translateY(-1px); }
+        .sw-login-btn:active { transform: translateY(0); }
+
+        /* Notice / Error */
+        .sw-notice {
+            margin-top: 16px; padding: 12px 14px;
+            background: #FDF2F4; border: 1px solid #F4D4DC; border-radius: 10px;
+            font-size: 12px; color: #5B1226;
+            display: flex; align-items: flex-start; gap: 8px;
+        }
+        .sw-err {
+            background: #FEF2F2; border: 1px solid #FECACA;
+            border-radius: 10px; padding: 10px 14px; margin-bottom: 16px;
+            font-size: 13px; color: #B91C1C;
+            display: flex; align-items: flex-start; gap: 8px;
+        }
+        .sw-err ul { margin: 0; padding-left: 1.2rem; }
+
+        .sw-login-wrap   { display: flex; flex-direction: column; align-items: center; gap: 20px; position: relative; z-index: 1; width: 100%; max-width: 420px; }
+        .sw-login-footer { text-align: center; font-size: 11px; color: rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body>
+    <div class="sw-amb-a"></div>
+    <div class="sw-amb-b"></div>
+    <div class="sw-grid-bg"></div>
+    <div class="sw-particle" style="left:14%;width:4px;height:4px;animation-delay:0s"></div>
+    <div class="sw-particle" style="left:28%;width:3px;height:3px;animation-delay:1.5s"></div>
+    <div class="sw-particle" style="left:44%;width:5px;height:5px;animation-delay:3s"></div>
+    <div class="sw-particle" style="left:62%;width:3px;height:3px;animation-delay:4.5s"></div>
+    <div class="sw-particle" style="left:78%;width:4px;height:4px;animation-delay:6s"></div>
+
+    <div class="sw-login-wrap">
+    <div class="sw-login-card" style="position:relative;z-index:1">
+
+        <div class="sw-logo-wrap">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                <path d="M12 16.5 C 8.2 14.2, 7 12.4, 7 10.6 A 2.5 2.5 0 0 1 12 9.6 A 2.5 2.5 0 0 1 17 10.6 C 17 12.4, 15.8 14.2, 12 16.5 Z" fill="#fff" stroke="none"></path>
+            </svg>
+        </div>
+
+        <div class="sw-login-title">SafeWoman</div>
+        <div class="sw-login-sub">Panel de Administración · Acceso restringido</div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="sw-err">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <div asp-validation-summary="All"></div>
+            </div>
+        }
+
+        <form asp-action="Login" asp-controller="Auth" asp-area="Admin" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            <div>
+                <label class="sw-field-label">Correo electrónico</label>
+                <div class="sw-field-wrap">
+                    <span class="sw-field-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                    </span>
+                    <input asp-for="Email" type="email" class="sw-field-input" placeholder="admin@safewoman.pe" autocomplete="email" />
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px">
+                <label class="sw-field-label">Contraseña</label>
+                <div class="sw-field-wrap" style="margin-bottom:0">
+                    <span class="sw-field-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </span>
+                    <input asp-for="Password" type="password" class="sw-field-input" placeholder="••••••••" autocomplete="current-password" id="pwd" style="padding-right:42px" />
+                    <button type="button" class="sw-pwd-toggle" onclick="const i=document.getElementById('pwd');i.type=i.type==='password'?'text':'password'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="sw-login-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>
+                Iniciar sesión
+            </button>
+        </form>
+
+        <div class="sw-notice">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+            Acceso exclusivo para personal autorizado del sistema SafeWoman.
+        </div>
+    </div>
+
+    <div class="sw-login-footer">© 2026 SafeWoman · UNSCH · Ley N°30364</div>
+    </div>
+</body>
+</html>

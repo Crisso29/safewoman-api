@@ -1,0 +1,54 @@
+## .NET / Visual Studio
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.pdb
+*.dll
+*.exe
+*.log
+Debug/
+Release/
+publish/
+TestResults/
+StyleCopReport.xml
+*.dbmdl
+*.jfm
+*.pfx
+*.publishsettings
+
+## Secrets — nunca subir
+appsettings.Development.json
+**/appsettings.*.json
+!**/appsettings.json
+secrets.json
+*.pfx
+
+## Google Maps y otros secrets del proyecto MAUI
+SafeWoman/Platforms/Android/Resources/values/strings.xml
+
+## MAUI outputs — muy pesados, no van al repo
+SafeWoman/bin/
+SafeWoman/obj/
+SafeWoman/Platforms/Android/Resources/mipmap-*/
+*.apk
+*.aab
+*.keystore
+
+## Rider
+.idea/
+
+## Node (para futuro)
+node_modules/
+package-lock.json
+
+## Sistema operativo
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Miscelánea
+*.tmp
+*.bak
+*.swp

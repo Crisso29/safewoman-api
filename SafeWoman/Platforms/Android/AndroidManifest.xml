@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+	<application
+		android:allowBackup="true"
+		android:icon="@mipmap/appicon"
+		android:roundIcon="@mipmap/appicon_round"
+		android:supportsRtl="true"
+		android:hardwareAccelerated="true"
+		android:largeHeap="true"
+		android:usesCleartextTraffic="true" />
+
+	<!-- Red -->
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+
+	<!-- GPS — requerido para el botón SOS (RF-07 / RN-05) -->
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+	<!-- Cámara — para foto del DNI en denuncia formal (RF-13) -->
+	<uses-permission android:name="android.permission.CAMERA" />
+
+	<!-- Almacenamiento — para seleccionar evidencias -->
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+	                 android:maxSdkVersion="32" />
+	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
+	                 android:minSdkVersion="33" />
+</manifest>

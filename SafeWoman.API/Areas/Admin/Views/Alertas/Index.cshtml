@@ -1,0 +1,168 @@
+@model IReadOnlyList<SafeWoman.Application.DTOs.Admin.AdminAlertaDto>
+@{ ViewBag.Title = "Alertas SOS"; }
+
+@section Styles {
+<style>
+.sw-alerta-row.sw-new {
+    animation: swRowIn .5s cubic-bezier(.4,0,.2,1) both;
+    background: #fff8f9;
+}
+@@keyframes swRowIn {
+    from { opacity:0; transform:translateY(-6px); background:#fde8ec; }
+    to   { opacity:1; transform:translateY(0);    background:#fff8f9; }
+}
+.sw-map-chip {
+    display: inline-flex; align-items: center; gap: .3rem;
+    background: #fde8ec; color: #8B1A3A;
+    padding: .2rem .55rem; border-radius: 20px;
+    font-size: .75rem; font-weight: 600;
+    text-decoration: none;
+    transition: background .15s, transform .12s;
+}
+.sw-map-chip:hover { background: #f7c5d0; color: #6B0F2A; transform: scale(1.03); }
+</style>
+}
+
+<!-- Header row -->
+<div class="d-flex align-items-end justify-content-between mb-4">
+    <div>
+        <h1 style="font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.02em">Alertas SOS</h1>
+        <p style="font-size:13px;color:#6B7280;margin:0">@Model.Count registro@(Model.Count != 1 ? "s" : "") en el historial</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="sw-live-badge" id="live-indicator" style="display:none">
+            <span class="sw-live-dot"></span>En vivo
+        </span>
+        <div class="sw-search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="sw-filter" placeholder="Buscar víctima…" oninput="filterTable(this.value)">
+        </div>
+    </div>
+</div>
+
+<div class="sw-card">
+    <div class="table-responsive">
+        <table class="sw-table" id="alertas-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Víctima</th>
+                    <th>Teléfono</th>
+                    <th>Ubicación GPS</th>
+                    <th>Activación</th>
+                    <th>Cancelación</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="alertas-body">
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="7">
+                        <div class="sw-empty">
+                            <div class="sw-empty-icon"><i class="bi bi-shield-check"></i></div>
+                            <div class="fw-semibold" style="color:#374151">Sin alertas registradas</div>
+                            <p>No hay alertas en el historial.</p>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @foreach (var a in Model)
+            {
+                <tr class="sw-alerta-row" data-name="@a.NombreVictima.ToLower()">
+                    <td><span style="font-size:.72rem;color:#d1d5db;font-weight:600">#@a.IdAlerta</span></td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="sw-avt" style="width:32px;height:32px;background:#fde8ec;font-size:.75rem;color:#8B1A3A">
+                                @(a.NombreVictima.Length > 0 ? a.NombreVictima[0].ToString().ToUpper() : "V")
+                            </div>
+                            <span class="fw-semibold" style="font-size:.85rem">@a.NombreVictima</span>
+                        </div>
+                    </td>
+                    <td style="font-size:.82rem;color:#6b7280">@a.TelefonoVictima</td>
+                    <td>
+                        <a class="sw-map-chip"
+                           href="https://maps.google.com/?q=@a.Latitud.ToString("F7", System.Globalization.CultureInfo.InvariantCulture),@a.Longitud.ToString("F7", System.Globalization.CultureInfo.InvariantCulture)"
+                           target="_blank">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            @a.Latitud.ToString("F5")°,&nbsp;@a.Longitud.ToString("F5")°
+                        </a>
+                    </td>
+                    <td style="font-size:.8rem;color:#6b7280;white-space:nowrap">
+                        @a.TimestampActivacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                    </td>
+                    <td style="font-size:.8rem;color:#9ca3af;white-space:nowrap">
+                        @(a.TimestampCancelacion.HasValue
+                            ? a.TimestampCancelacion.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            : "—")
+                    </td>
+                    <td>
+                        <span class="sw-badge sw-badge-@a.Estado.ToLower()">
+                            <span class="sw-dot"></span>@a.Estado
+                        </span>
+                    </td>
+                    <td>
+                    @if (a.Estado == "Activa")
+                    {
+                        <form asp-action="AtenderAlerta" asp-controller="Alertas" asp-area="Admin" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@a.IdAlerta" />
+                            <button type="submit" class="sw-btn sw-btn-ghost" style="font-size:.73rem;padding:.25rem .65rem;color:#15803d;border-color:#bbf7d0"
+                                    onclick="return confirm('¿Marcar esta alerta como atendida?')">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                Atendida
+                            </button>
+                        </form>
+                    }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function filterTable(q) {
+    const rows = document.querySelectorAll('#alertas-body tr[data-name]');
+    q = q.toLowerCase().trim();
+    rows.forEach(r => r.style.display = !q || r.dataset.name.includes(q) ? '' : 'none');
+}
+
+function onNuevaAlerta(data) {
+    document.getElementById("live-indicator").style.display = "inline-flex";
+
+    const tbody = document.getElementById("alertas-body");
+    const row = document.createElement("tr");
+    row.className = "sw-alerta-row sw-new";
+    row.dataset.name = (data.nombreVictima || '').toLowerCase();
+    row.innerHTML = `
+        <td><span style="font-size:.72rem;color:#d1d5db;font-weight:600">#${data.idAlerta}</span></td>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <div class="sw-avt" style="width:32px;height:32px;background:#fde8ec;font-size:.75rem;color:#8B1A3A">
+              ${(data.nombreVictima?.[0] || 'V').toUpperCase()}
+            </div>
+            <span class="fw-semibold" style="font-size:.85rem">${data.nombreVictima}</span>
+          </div>
+        </td>
+        <td style="font-size:.82rem;color:#6b7280">${data.telefono}</td>
+        <td>
+          <a class="sw-map-chip" href="https://maps.google.com/?q=${data.lat},${data.lng}" target="_blank">
+            <i class="bi bi-geo-alt-fill"></i>
+            ${parseFloat(data.lat).toFixed(5)}°,&nbsp;${parseFloat(data.lng).toFixed(5)}°
+          </a>
+        </td>
+        <td style="font-size:.8rem;color:#6b7280;white-space:nowrap">Ahora mismo</td>
+        <td style="font-size:.8rem;color:#9ca3af">—</td>
+        <td><span class="sw-badge sw-badge-activa"><span class="sw-dot"></span>Activa</span></td>
+    `;
+    tbody.insertBefore(row, tbody.firstChild);
+
+    const empty = tbody.querySelector('.sw-empty');
+    if (empty) empty.closest('tr').remove();
+}
+</script>
+}

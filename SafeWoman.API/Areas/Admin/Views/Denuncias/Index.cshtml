@@ -1,0 +1,633 @@
+@model IReadOnlyList<SafeWoman.Application.DTOs.Admin.AdminDenunciaDto>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@{
+    ViewBag.Title = "Denuncias";
+    var anonimas = ViewBag.Anonimas as IReadOnlyList<SafeWoman.Application.DTOs.Admin.AdminDenunciaAnonimaDto>;
+
+    // Coinciden exactamente con EstadoDenuncia enum
+    var estadoOpts = new (string Val, string Lbl)[]
+    {
+        ("Pendiente", "Pendiente"),
+        ("EnProceso", "En proceso"),
+        ("Atendida",  "Atendida"),
+        ("Archivada", "Archivada"),
+    };
+
+    var jOpts = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy   = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters             = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+    };
+    var formalesJson = JsonSerializer.Serialize(Model, jOpts);
+    var anonimasJson = JsonSerializer.Serialize(anonimas, jOpts);
+
+    string EstadoCss(string e) => e switch {
+        "Pendiente" => "sw-badge-pendiente",
+        "EnProceso" => "sw-badge-enproceso",
+        "Atendida"  => "sw-badge-atendida",
+        "Archivada" => "sw-badge-archivada",
+        _           => ""
+    };
+    string EstadoLbl(string e) => e == "EnProceso" ? "En proceso" : e;
+}
+
+@section Styles {
+<style>
+.sw-den-row { cursor: pointer; }
+
+.sw-btn-ver {
+    display:inline-flex; align-items:center; gap:.3rem;
+    padding:.28rem .65rem; border-radius:7px; font-size:.76rem; font-weight:600;
+    background:transparent; border:1.5px solid #e5e7eb; color:#6b7280;
+    transition:all .14s; cursor:pointer; white-space:nowrap;
+}
+.sw-btn-ver:hover { background:#f3f4f6; border-color:#d1d5db; color:#111827; }
+
+.sw-est-sel {
+    font-size:.77rem; border-radius:7px; border:1.5px solid #e5e7eb;
+    padding:.25rem .4rem; color:#374151; background:#fff;
+}
+.sw-est-ok {
+    display:inline-flex; align-items:center; padding:.28rem .55rem;
+    border-radius:7px; font-size:.76rem; font-weight:600; cursor:pointer;
+    background:transparent; border:1.5px solid #e5e7eb; color:#6b7280;
+    transition:all .14s;
+}
+.sw-est-ok:hover { background:#f9fafb; border-color:#d1d5db; color:#374151; }
+
+/* modal */
+.dtl-label  { font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#9ca3af;margin-bottom:.25rem; }
+.dtl-value  { font-size:.88rem;color:#1f2937; }
+.dtl-desc   { font-size:.9rem;color:#374151;line-height:1.65;background:#f9fafb;border-radius:10px;padding:.9rem 1rem; }
+.dtl-grid   { display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem; }
+.dtl-map-btn {
+    display:inline-flex;align-items:center;gap:.45rem;
+    padding:.42rem .9rem;border-radius:9px;font-size:.8rem;font-weight:600;
+    background:#8B1A3A;color:#fff;text-decoration:none;border:none;cursor:pointer;
+    transition:background .15s;margin-top:.5rem;
+}
+.dtl-map-btn:hover { background:#6d1430;color:#fff; }
+.dtl-map-btn-osm {
+    display:inline-flex;align-items:center;gap:.4rem;
+    padding:.42rem .8rem;border-radius:9px;font-size:.8rem;font-weight:600;
+    background:transparent;color:#374151;text-decoration:none;
+    border:1.5px solid #e5e7eb;cursor:pointer;transition:all .15s;margin-top:.5rem;margin-left:.4rem;
+}
+.dtl-map-btn-osm:hover { background:#f3f4f6;border-color:#d1d5db; }
+.file-card  {
+    display:flex;align-items:center;gap:.6rem;background:#f9fafb;
+    border:1px solid #e5e7eb;border-radius:9px;padding:.5rem .7rem;
+    text-decoration:none;color:inherit;transition:background .12s;font-size:.82rem;
+}
+.file-card:hover { background:#f3f4f6;border-color:#d1d5db;color:#111827; }
+.fc-icon { width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0; }
+.fc-img  { background:#dbeafe;color:#1d4ed8; }
+.fc-vid  { background:#fce7f3;color:#be185d; }
+.fc-pdf  { background:#fee2e2;color:#b91c1c; }
+.fc-doc  { background:#ede9fe;color:#7c3aed; }
+.fc-gen  { background:#f3f4f6;color:#6b7280; }
+.dni-prev { width:100%;border-radius:10px;border:1px solid #e5e7eb;max-height:200px;object-fit:contain;background:#f9fafb; }
+.sw-flash-ok  { background:#d1e7dd;color:#0a3622;border:1px solid #a3cfbb;border-radius:10px;padding:.7rem 1rem;font-size:.85rem;margin-bottom:.9rem; }
+.sw-flash-err { background:#f8d7da;color:#842029;border:1px solid #f1aeb5;border-radius:10px;padding:.7rem 1rem;font-size:.85rem;margin-bottom:.9rem; }
+
+/* Tabs */
+.sw-tab-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:7px 14px; border-radius:7px; border:none;
+    font-size:.813rem; font-weight:500; cursor:pointer; font-family:inherit;
+    background:transparent; color:#6B7280; transition:all .15s;
+}
+.sw-tab-btn:hover { color:#1A1A1A; background:rgba(255,255,255,.6); }
+.sw-tab-active { background:#fff !important; color:#1A1A1A !important; font-weight:600 !important; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+.sw-tab-count { font-size:.7rem; font-weight:700; background:#F0EBED; color:#6B7280; padding:1px 7px; border-radius:20px; }
+.sw-tab-active .sw-tab-count { background:#FDE8EC; color:#8B1A3A; }
+</style>
+}
+
+@if (TempData["Mensaje"] != null)
+{<div class="sw-flash-ok"><i class="bi bi-check-circle-fill me-2"></i>@TempData["Mensaje"]</div>}
+@if (TempData["Error"] != null)
+{<div class="sw-flash-err"><i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]</div>}
+
+<div class="d-flex align-items-end justify-content-between mb-4">
+    <div>
+        <h1 style="font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.02em">Gestión de Denuncias</h1>
+        <p style="font-size:13px;color:#6B7280;margin:0">
+            <b style="color:#1A1A1A">@Model.Count</b> formal@(Model.Count != 1 ? "es" : "") · <b style="color:#1A1A1A">@(anonimas?.Count ?? 0)</b> anónima@((anonimas?.Count ?? 0) != 1 ? "s" : "")
+        </p>
+    </div>
+    <div class="sw-search">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="Buscar denuncia o nombre…" oninput="filterDenuncias(this.value)">
+    </div>
+</div>
+
+<div style="display:flex;gap:4px;margin-bottom:16px;background:#F4F0F2;padding:4px;border-radius:10px;width:fit-content">
+    <button class="sw-tab-btn sw-tab-active" id="btn-formales" onclick="showTab('formales')">
+        <i class="bi bi-file-earmark-person me-1"></i>Formales
+        <span class="sw-tab-count">@Model.Count</span>
+    </button>
+    <button class="sw-tab-btn" id="btn-anonimas" onclick="showTab('anonimas')">
+        <i class="bi bi-incognito me-1"></i>Anónimas
+        <span class="sw-tab-count">@(anonimas?.Count ?? 0)</span>
+    </button>
+</div>
+
+<div>
+
+    @* ══ FORMALES ══════════════════════════════════════════════════════════════ *@
+    <div id="tab-formales" class="sw-tab-pane">
+        <div class="sw-card">
+            <div class="table-responsive">
+                <table class="sw-table">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Víctima</th><th>Denunciado</th>
+                            <th>Ubicación</th><th>Fecha hecho</th><th>Recibida</th>
+                            <th>Estado</th><th>Cambiar</th><th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var d in Model)
+                    {
+                        <tr class="sw-den-row">
+                            <td style="font-size:.72rem;color:#adb5bd;font-weight:600">#@d.IdDenuncia</td>
+                            <td>
+                                <div class="fw-semibold" style="font-size:.85rem">@d.NombreVictima</div>
+                                <div class="text-muted" style="font-size:.75rem">@d.TelefonoVictima</div>
+                            </td>
+                            <td style="font-size:.82rem">
+                                @(d.NombreDenunciado ?? "—")
+                                @if (!string.IsNullOrEmpty(d.RelacionDenunciado))
+                                {<div class="text-muted" style="font-size:.72rem">@d.RelacionDenunciado</div>}
+                            </td>
+                            <td style="font-size:.8rem">
+                                @(d.Departamento ?? "—")@(!string.IsNullOrEmpty(d.Provincia) ? $", {d.Provincia}" : "")
+                            </td>
+                            <td style="font-size:.8rem;white-space:nowrap">
+                                @(d.FechaHecho.HasValue ? d.FechaHecho.Value.ToString("dd/MM/yyyy") : "—")
+                            </td>
+                            <td style="font-size:.78rem;color:#6b7280;white-space:nowrap">
+                                @d.FechaEnvio.ToLocalTime().ToString("dd/MM/yy HH:mm")
+                            </td>
+                            <td>
+                                <span class="sw-badge @EstadoCss(d.Estado)">
+                                    <span class="sw-dot"></span>@EstadoLbl(d.Estado)
+                                </span>
+                            </td>
+                            <td>
+                                <form asp-action="CambiarEstado" asp-controller="Denuncias" asp-area="Admin"
+                                      method="post" class="d-flex gap-1 align-items-center">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@d.IdDenuncia" />
+                                    <input type="hidden" name="anonima" value="false" />
+                                    <select name="estado" class="sw-est-sel">
+                                        @foreach (var opt in estadoOpts)
+                                        {
+                                            if (d.Estado == opt.Val)
+                                            {<option value="@opt.Val" selected>@opt.Lbl</option>}
+                                            else
+                                            {<option value="@opt.Val">@opt.Lbl</option>}
+                                        }
+                                    </select>
+                                    <button type="submit" class="sw-est-ok" title="Aplicar cambio de estado">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <button class="sw-btn-ver" onclick="verDetalle('formal',@d.IdDenuncia)">
+                                    <i class="bi bi-eye"></i> Ver
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="9">
+                            <div class="sw-empty">
+                                <div class="sw-empty-icon"><i class="bi bi-file-earmark-x"></i></div>
+                                <div class="fw-semibold" style="color:#374151">Sin denuncias formales</div>
+                                <p>Las denuncias con identificación aparecerán aquí.</p>
+                            </div>
+                        </td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @* ══ ANÓNIMAS ══════════════════════════════════════════════════════════════ *@
+    <div id="tab-anonimas" class="sw-tab-pane" style="display:none">
+        <div class="sw-card">
+            <div class="table-responsive">
+                <table class="sw-table">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Dispositivo</th><th>Denunciado</th>
+                            <th>Ubicación</th><th>Fecha hecho</th><th>Recibida</th>
+                            <th>Estado</th><th>Cambiar</th><th>Bloquear dispositivo</th><th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (anonimas != null && anonimas.Any())
+                    {
+                        foreach (var d in anonimas)
+                        {
+                            <tr class="sw-den-row">
+                                <td style="font-size:.72rem;color:#adb5bd;font-weight:600">#@d.IdDenunciaAnonima</td>
+                                <td>
+                                    @if (d.HuellaActiva)
+                                    {<span class="sw-badge sw-badge-atendida" style="font-size:.72rem"><i class="bi bi-phone-fill me-1"></i>Activo</span>}
+                                    else
+                                    {<span class="sw-badge" style="background:#fde8e8;color:#c62828;font-size:.72rem"><i class="bi bi-ban me-1"></i>Bloqueado</span>}
+                                </td>
+                                <td style="font-size:.82rem">
+                                    @(d.NombreDenunciado ?? "—")
+                                    @if (!string.IsNullOrEmpty(d.RelacionDenunciado))
+                                    {<div class="text-muted" style="font-size:.72rem">@d.RelacionDenunciado</div>}
+                                </td>
+                                <td style="font-size:.8rem">
+                                    @(d.Departamento ?? "—")@(!string.IsNullOrEmpty(d.Provincia) ? $", {d.Provincia}" : "")
+                                </td>
+                                <td style="font-size:.8rem;white-space:nowrap">
+                                    @(d.FechaHecho.HasValue ? d.FechaHecho.Value.ToString("dd/MM/yyyy") : "—")
+                                </td>
+                                <td style="font-size:.78rem;color:#6b7280;white-space:nowrap">
+                                    @d.FechaEnvio.ToLocalTime().ToString("dd/MM/yy HH:mm")
+                                </td>
+                                <td>
+                                    <span class="sw-badge @EstadoCss(d.Estado)">
+                                        <span class="sw-dot"></span>@EstadoLbl(d.Estado)
+                                    </span>
+                                </td>
+                                <td>
+                                    <form asp-action="CambiarEstado" asp-controller="Denuncias" asp-area="Admin"
+                                          method="post" class="d-flex gap-1 align-items-center">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@d.IdDenunciaAnonima" />
+                                        <input type="hidden" name="anonima" value="true" />
+                                        <select name="estado" class="sw-est-sel">
+                                            @foreach (var opt in estadoOpts)
+                                            {
+                                                if (d.Estado == opt.Val)
+                                                {<option value="@opt.Val" selected>@opt.Lbl</option>}
+                                                else
+                                                {<option value="@opt.Val">@opt.Lbl</option>}
+                                            }
+                                        </select>
+                                        <button type="submit" class="sw-est-ok" title="Aplicar cambio de estado">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form asp-action="ToggleHuella" asp-controller="Denuncias" asp-area="Admin"
+                                          method="post" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id"       value="@d.IdHuella" />
+                                        <input type="hidden" name="bloquear" value="@(d.HuellaActiva ? "true" : "false")" />
+                                        <input type="hidden" name="returnTo" value="Index" />
+                                        <button type="submit"
+                                                class="sw-toggle-btn @(d.HuellaActiva ? "desactivar" : "activar")"
+                                                onclick="return confirm('@(d.HuellaActiva ? "¿Bloquear este dispositivo? Ya no podrá enviar denuncias." : "¿Desbloquear este dispositivo?")')">
+                                            <i class="bi @(d.HuellaActiva ? "bi-phone-fill" : "bi-ban")"></i>
+                                            @(d.HuellaActiva ? "Bloquear" : "Desbloquear")
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <button class="sw-btn-ver" onclick="verDetalle('anonima',@d.IdDenunciaAnonima)">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="10">
+                            <div class="sw-empty">
+                                <div class="sw-empty-icon"><i class="bi bi-incognito"></i></div>
+                                <div class="fw-semibold" style="color:#374151">Sin denuncias anónimas</div>
+                                <p>Las denuncias sin identificación aparecerán aquí.</p>
+                            </div>
+                        </td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Modals {
+@* Modal renderizado fuera de .sw-main para evitar stacking context que bloquea el backdrop *@
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 60px rgba(0,0,0,.18)">
+
+            <div class="modal-header" style="border-bottom:1px solid #f3f4f6;padding:1rem 1.4rem .85rem">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span id="dtl-tipo" class="sw-badge"></span>
+                    <span id="dtl-num"  style="font-size:.82rem;color:#9ca3af;font-weight:600"></span>
+                    <span id="dtl-est"  class="sw-badge ms-1"></span>
+                </div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" style="background:#f9fafb;padding:1.2rem 1.4rem">
+                <div class="row g-3">
+
+                    @* ── col izquierda: descripción + cuándo + mapa ── *@
+                    <div class="col-lg-7">
+
+                        <div class="sw-card mb-3" style="padding:1rem 1.1rem">
+                            <div class="dtl-label">Descripción de los hechos</div>
+                            <div id="dtl-desc" class="dtl-desc mt-1">—</div>
+                        </div>
+
+                        <div class="sw-card mb-3" style="padding:1rem 1.1rem">
+                            <div class="dtl-label mb-2">Cuándo y dónde ocurrió</div>
+                            <div class="dtl-grid mb-2">
+                                <div>
+                                    <div class="dtl-label" style="font-size:.62rem">FECHA DEL HECHO</div>
+                                    <div class="dtl-value" id="dtl-fecha-hecho">—</div>
+                                </div>
+                                <div>
+                                    <div class="dtl-label" style="font-size:.62rem">HORA APROX.</div>
+                                    <div class="dtl-value" id="dtl-hora">—</div>
+                                </div>
+                                <div>
+                                    <div class="dtl-label" style="font-size:.62rem">DEPARTAMENTO</div>
+                                    <div class="dtl-value" id="dtl-dept">—</div>
+                                </div>
+                                <div>
+                                    <div class="dtl-label" style="font-size:.62rem">PROVINCIA / DISTRITO</div>
+                                    <div class="dtl-value" id="dtl-prov">—</div>
+                                </div>
+                            </div>
+                            <div id="dtl-ref-row" style="display:none;margin-bottom:.4rem">
+                                <div class="dtl-label" style="font-size:.62rem">REFERENCIA</div>
+                                <div class="dtl-value" id="dtl-ref" style="font-size:.84rem"></div>
+                            </div>
+                            <div id="dtl-coords-row" style="display:none;margin-bottom:.4rem">
+                                <div class="dtl-label" style="font-size:.62rem">COORDENADAS GPS</div>
+                                <div class="dtl-value" id="dtl-coords" style="font-size:.8rem;font-family:monospace"></div>
+                            </div>
+                            <div id="dtl-gps-row" style="display:none;margin-top:.3rem">
+                                <a id="dtl-gmap" href="#" target="_blank" class="dtl-map-btn">
+                                    <i class="bi bi-geo-alt-fill"></i> Ver en Google Maps
+                                </a>
+                                <a id="dtl-osm" href="#" target="_blank" class="dtl-map-btn-osm">
+                                    <i class="bi bi-map"></i> OpenStreetMap
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    @* ── col derecha: persona + denunciado + archivos ── *@
+                    <div class="col-lg-5 d-flex flex-column gap-3">
+
+                        @* Víctima (formal) *@
+                        <div class="sw-card" id="dtl-vc-card" style="padding:1rem 1.1rem;display:none">
+                            <div class="dtl-label mb-2">Víctima denunciante</div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <div class="sw-avt" id="dtl-vc-ini" style="width:38px;height:38px;font-size:.9rem;background:#fde8ec;color:#8B1A3A">?</div>
+                                <div>
+                                    <div class="fw-semibold" id="dtl-vc-nom" style="font-size:.88rem">—</div>
+                                    <div class="text-muted"  id="dtl-vc-tel" style="font-size:.78rem">—</div>
+                                </div>
+                            </div>
+                            <div class="dtl-label" style="font-size:.62rem">FECHA DE ENVÍO</div>
+                            <div class="dtl-value" id="dtl-vc-env" style="font-size:.8rem">—</div>
+                        </div>
+
+                        @* Dispositivo (anónima) *@
+                        <div class="sw-card" id="dtl-an-card" style="padding:1rem 1.1rem;display:none">
+                            <div class="dtl-label mb-2">Denuncia anónima</div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <div style="width:38px;height:38px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:1.1rem">🕵️</div>
+                                <div>
+                                    <div class="fw-semibold" style="font-size:.88rem">Identidad protegida</div>
+                                    <div id="dtl-an-huella" style="font-size:.78rem"></div>
+                                </div>
+                            </div>
+                            <div class="dtl-label" style="font-size:.62rem">FECHA DE ENVÍO</div>
+                            <div class="dtl-value" id="dtl-an-env" style="font-size:.8rem">—</div>
+                        </div>
+
+                        @* Denunciado *@
+                        <div class="sw-card" style="padding:1rem 1.1rem">
+                            <div class="dtl-label mb-2">Persona denunciada</div>
+                            <div class="dtl-grid">
+                                <div>
+                                    <div class="dtl-label" style="font-size:.62rem">NOMBRE / ALIAS</div>
+                                    <div class="dtl-value" id="dtl-den-nom">—</div>
+                                </div>
+                                <div>
+                                    <div class="dtl-label" style="font-size:.62rem">RELACIÓN</div>
+                                    <div class="dtl-value" id="dtl-den-rel">—</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Archivos *@
+                        <div class="sw-card" style="padding:1rem 1.1rem;flex:1">
+                            <div class="dtl-label mb-2">Archivos adjuntos</div>
+
+                            <div id="dtl-dni-row" style="display:none;margin-bottom:.9rem">
+                                <div class="dtl-label" style="font-size:.62rem">FOTO DEL DNI</div>
+                                <a id="dtl-dni-link" href="#" target="_blank">
+                                    <img id="dtl-dni-img" src="" alt="DNI" class="dni-prev mt-1" />
+                                </a>
+                            </div>
+
+                            <div class="dtl-label" style="font-size:.62rem">EVIDENCIAS</div>
+                            <div id="dtl-evs" class="d-flex flex-column gap-2 mt-1">
+                                <span class="text-muted" style="font-size:.82rem">Sin evidencias.</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="border-top:1px solid #f3f4f6;padding:.8rem 1.4rem;background:#fff;border-radius:0 0 16px 16px">
+                <form id="dtl-est-form" asp-action="CambiarEstado" asp-controller="Denuncias" asp-area="Admin"
+                      method="post" class="d-flex align-items-center gap-2 me-auto">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="dtl-form-id"    name="id"      value="" />
+                    <input type="hidden" id="dtl-form-anon"  name="anonima" value="false" />
+                    <i class="bi bi-arrow-repeat text-muted"></i>
+                    <select id="dtl-form-est" name="estado" class="form-select form-select-sm"
+                            style="min-width:145px;font-size:.82rem;border-radius:8px">
+                        @foreach (var opt in estadoOpts)
+                        {<option value="@opt.Val">@opt.Lbl</option>}
+                    </select>
+                    <button type="submit" class="sw-btn sw-btn-brand" style="font-size:.82rem;padding:.35rem .9rem">
+                        <i class="bi bi-check-lg me-1"></i>Aplicar estado
+                    </button>
+                </form>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+@section Scripts {
+<script>
+// Tab switching — JS puro, sin depender de Bootstrap tabs
+function showTab(tab) {
+    // Panes
+    document.querySelectorAll('.sw-tab-pane').forEach(p => p.style.display = 'none');
+    document.getElementById('tab-' + tab).style.display = '';
+    // Botones
+    document.querySelectorAll('.sw-tab-btn').forEach(b => b.classList.remove('sw-tab-active'));
+    document.getElementById('btn-' + tab).classList.add('sw-tab-active');
+}
+
+// Search
+function filterDenuncias(q) {
+    q = q.toLowerCase().trim();
+    document.querySelectorAll('#tab-formales tbody tr.sw-den-row').forEach(r => {
+        r.style.display = !q || r.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+    document.querySelectorAll('#tab-anonimas tbody tr.sw-den-row').forEach(r => {
+        r.style.display = !q || r.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+
+const FORMALES = @Html.Raw(formalesJson);
+const ANONIMAS = @Html.Raw(anonimasJson);
+
+function fmtSize(b) {
+    if (!b) return '';
+    if (b < 1024)    return b + ' B';
+    if (b < 1048576) return (b/1024).toFixed(0) + ' KB';
+    return (b/1048576).toFixed(1) + ' MB';
+}
+function fileIcon(tipo) {
+    const m = {Imagen:'bi-image',Video:'bi-camera-video',Pdf:'bi-file-pdf',Documento:'bi-file-earmark-text'};
+    return m[tipo] || 'bi-paperclip';
+}
+function fileCls(tipo) {
+    const m = {Imagen:'fc-img',Video:'fc-vid',Pdf:'fc-pdf',Documento:'fc-doc'};
+    return m[tipo] || 'fc-gen';
+}
+function estLabel(e) {
+    return {EnProceso:'En proceso',Pendiente:'Pendiente',Atendida:'Atendida',Archivada:'Archivada'}[e] || e;
+}
+function estCss(e) {
+    return {Pendiente:'sw-badge-pendiente',EnProceso:'sw-badge-enproceso',
+            Atendida:'sw-badge-atendida',Archivada:'sw-badge-archivada'}[e] || '';
+}
+function txt(id, val) { document.getElementById(id).textContent = val || '—'; }
+function show(id, v)  { document.getElementById(id).style.display = v ? '' : 'none'; }
+
+function verDetalle(tipo, id) {
+    const list = tipo === 'formal' ? FORMALES : ANONIMAS;
+    const d    = list.find(x => tipo === 'formal' ? x.idDenuncia == id : x.idDenunciaAnonima == id);
+    if (!d) return;
+
+    const numId = tipo === 'formal' ? d.idDenuncia : d.idDenunciaAnonima;
+
+    // Header
+    const tipoBadge = document.getElementById('dtl-tipo');
+    tipoBadge.textContent = tipo === 'formal' ? '📄 Denuncia formal' : '🕵️ Denuncia anónima';
+    tipoBadge.style.cssText = tipo === 'formal'
+        ? 'background:#fde8ec;color:#8B1A3A;padding:.3rem .7rem;border-radius:20px;font-size:.78rem;font-weight:700'
+        : 'background:#e0e7ff;color:#3730a3;padding:.3rem .7rem;border-radius:20px;font-size:.78rem;font-weight:700';
+
+    document.getElementById('dtl-num').textContent = `#${numId}`;
+
+    const estBadge = document.getElementById('dtl-est');
+    estBadge.className = `sw-badge ${estCss(d.estado)}`;
+    estBadge.innerHTML = `<span class="sw-dot"></span>${estLabel(d.estado)}`;
+
+    // Descripción
+    document.getElementById('dtl-desc').textContent = d.descripcion || 'Sin descripción proporcionada.';
+
+    // Cuándo y dónde
+    txt('dtl-fecha-hecho', d.fechaHecho
+        ? new Date(d.fechaHecho).toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'})
+        : null);
+    txt('dtl-hora', d.horaHecho ? d.horaHecho.substring(0,5) + ' h' : null);
+    txt('dtl-dept', d.departamento);
+    txt('dtl-prov', [d.provincia, d.distrito].filter(Boolean).join(' / ') || null);
+
+    show('dtl-ref-row', d.referenciaUbicacion);
+    if (d.referenciaUbicacion) txt('dtl-ref', d.referenciaUbicacion);
+
+    const hasGps = d.latitud != null && d.longitud != null;
+    show('dtl-coords-row', hasGps);
+    show('dtl-gps-row',    hasGps);
+    if (hasGps) {
+        const lat = parseFloat(d.latitud);
+        const lng = parseFloat(d.longitud);
+        document.getElementById('dtl-coords').textContent =
+            `Lat: ${lat.toFixed(6)}  ·  Lng: ${lng.toFixed(6)}`;
+        document.getElementById('dtl-gmap').href =
+            `https://maps.google.com/?q=${lat},${lng}`;
+        document.getElementById('dtl-osm').href =
+            `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
+    }
+
+    // Persona
+    if (tipo === 'formal') {
+        show('dtl-vc-card', true); show('dtl-an-card', false);
+        document.getElementById('dtl-vc-ini').textContent = (d.nombreVictima||'?')[0].toUpperCase();
+        txt('dtl-vc-nom', d.nombreVictima);
+        txt('dtl-vc-tel', d.telefonoVictima);
+        txt('dtl-vc-env', new Date(d.fechaEnvio).toLocaleString('es-PE'));
+    } else {
+        show('dtl-vc-card', false); show('dtl-an-card', true);
+        document.getElementById('dtl-an-huella').innerHTML = d.huellaActiva
+            ? '<span style="color:#15803d"><i class="bi bi-check-circle-fill me-1"></i>Dispositivo activo</span>'
+            : '<span style="color:#c62828"><i class="bi bi-ban me-1"></i>Dispositivo bloqueado</span>';
+        txt('dtl-an-env', new Date(d.fechaEnvio).toLocaleString('es-PE'));
+    }
+
+    // Denunciado
+    txt('dtl-den-nom', d.nombreDenunciado);
+    txt('dtl-den-rel', d.relacionDenunciado);
+
+    // DNI
+    const hasDni = tipo === 'formal' && d.fotoDniRuta;
+    show('dtl-dni-row', hasDni);
+    if (hasDni) {
+        const url = d.fotoDniRuta.startsWith('/') ? d.fotoDniRuta : '/' + d.fotoDniRuta;
+        document.getElementById('dtl-dni-img').src   = url;
+        document.getElementById('dtl-dni-link').href = url;
+    }
+
+    // Evidencias
+    const evs = d.evidencias || [];
+    document.getElementById('dtl-evs').innerHTML = evs.length === 0
+        ? '<span class="text-muted" style="font-size:.82rem">Sin evidencias adjuntas.</span>'
+        : evs.map(ev => `
+            <a class="file-card" href="${ev.urlDescarga}" target="_blank">
+                <span class="fc-icon ${fileCls(ev.tipo)}"><i class="bi ${fileIcon(ev.tipo)}"></i></span>
+                <div style="min-width:0;flex:1">
+                    <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.nombreArchivo}</div>
+                    <div style="font-size:.72rem;color:#9ca3af">${ev.tipo||'Archivo'}${ev.tamanioBytes ? ' · '+fmtSize(ev.tamanioBytes) : ''}</div>
+                </div>
+                <i class="bi bi-download" style="color:#9ca3af;font-size:.8rem"></i>
+            </a>`).join('');
+
+    // Footer cambio de estado
+    document.getElementById('dtl-form-id').value   = numId;
+    document.getElementById('dtl-form-anon').value = tipo === 'anonima' ? 'true' : 'false';
+    const sel = document.getElementById('dtl-form-est');
+    for (const opt of sel.options) opt.selected = opt.value === d.estado;
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('detailModal')).show();
+}
+
+</script>
+}

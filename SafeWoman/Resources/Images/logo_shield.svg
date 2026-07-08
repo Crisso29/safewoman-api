@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="220" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sombra del escudo -->
+  <path d="M100 18 L180 50 L180 118 C180 162 144 196 100 212 C56 196 20 162 20 118 L20 50 Z"
+        fill="white" opacity="0.18"/>
+  <!-- Escudo principal blanco -->
+  <path d="M100 26 L172 55 L172 118 C172 158 140 190 100 205 C60 190 28 158 28 118 L28 55 Z"
+        fill="white"/>
+  <!-- Corazón en color marca dentro del escudo -->
+  <path d="M100 166
+           C100 166 52 136 52 104
+           C52 84 66 72 82 72
+           C91 72 100 82 100 82
+           C100 82 109 72 118 72
+           C134 72 148 84 148 104
+           C148 136 100 166 100 166 Z"
+        fill="#8B1A3A"/>
+</svg>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SafeWoman.Views.Auth.OtpPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SafeWoman.ViewModels.Auth"
+    Shell.NavBarIsVisible="False">
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#8B1A3A" Offset="0" />
+                <GradientStop Color="#6B0F2A" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <VerticalStackLayout
+            Padding="40,80,40,40"
+            Spacing="0"
+            VerticalOptions="Center">
+
+            <Label Text="📱" FontSize="56" HorizontalOptions="Center" Margin="0,0,0,24" />
+
+            <Label
+                Text="Verificación SMS"
+                FontSize="26"
+                FontAttributes="Bold"
+                TextColor="White"
+                HorizontalOptions="Center"
+                Margin="0,0,0,12" />
+
+            <Label
+                Text="{Binding Telefono, StringFormat='Ingrese el código enviado al {0}'}"
+                FontSize="14"
+                TextColor="#CCffffff"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                Margin="0,0,0,40" />
+
+            <Entry
+                Text="{Binding Codigo}"
+                Placeholder="000000"
+                Keyboard="Numeric"
+                MaxLength="6"
+                FontSize="32"
+                HorizontalTextAlignment="Center"
+                BackgroundColor="#33FFFFFF"
+                TextColor="White"
+                PlaceholderColor="#66FFFFFF"
+                Margin="0,0,0,32" />
+
+            <Label
+                Text="{Binding ErrorMessage}"
+                TextColor="#FFCDD2"
+                FontSize="13"
+                HorizontalOptions="Center"
+                IsVisible="{Binding ErrorMessage, Converter={x:StaticResource StringNotEmptyConverter}}"
+                Margin="0,0,0,16" />
+
+            <Button
+                Text="Verificar código"
+                Command="{Binding VerificarCommand}"
+                BackgroundColor="White"
+                TextColor="{StaticResource BrandDark}"
+                FontAttributes="Bold"
+                CornerRadius="12"
+                HeightRequest="54"
+                Margin="0,0,0,16" />
+
+            <Button
+                Text="Reenviar código"
+                Command="{Binding ReenviarCommand}"
+                BackgroundColor="Transparent"
+                TextColor="White"
+                FontSize="14"
+                FontAttributes="Bold"
+                BorderColor="#66FFFFFF"
+                BorderWidth="1"
+                CornerRadius="12"
+                HeightRequest="44" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" Color="White" IsVisible="{Binding IsBusy}" Margin="0,16,0,0" />
+
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

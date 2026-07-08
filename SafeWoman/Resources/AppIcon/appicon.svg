@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="456" height="456" viewBox="0 0 456 456" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo con color de marca -->
+  <rect width="456" height="456" fill="#8B1A3A" rx="76"/>
+  <!-- Escudo (outline blanco) -->
+  <path d="M228 52 L376 108 L376 242
+           C376 328 312 396 228 424
+           C144 396 80 328 80 242
+           L80 108 Z"
+        fill="white" opacity="0.15"/>
+  <!-- Escudo (relleno principal) -->
+  <path d="M228 68 L360 118 L360 242
+           C360 318 302 380 228 406
+           C154 380 96 318 96 242
+           L96 118 Z"
+        fill="white"/>
+  <!-- Corazón dentro del escudo -->
+  <path d="M228 318
+           C228 318 146 270 146 212
+           C146 176 172 154 200 154
+           C214 154 228 168 228 168
+           C228 168 242 154 256 154
+           C284 154 310 176 310 212
+           C310 270 228 318 228 318 Z"
+        fill="#8B1A3A"/>
+</svg>

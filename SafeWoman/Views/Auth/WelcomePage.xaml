@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SafeWoman.Views.Auth.WelcomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SafeWoman.ViewModels.Auth"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.BindingContext>
+        <vm:WelcomeViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#8B1A3A" Offset="0" />
+                <GradientStop Color="#A31D45" Offset="0.5" />
+                <GradientStop Color="#6B0F2A" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <VerticalStackLayout
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            Padding="40,0"
+            Spacing="0">
+
+            <!-- Logo -->
+            <Image
+                Source="logo_shield.svg"
+                WidthRequest="110"
+                HeightRequest="120"
+                HorizontalOptions="Center"
+                Aspect="AspectFit"
+                Margin="0,0,0,24" />
+
+            <Label
+                Text="SafeWoman"
+                FontSize="34"
+                FontAttributes="Bold"
+                TextColor="White"
+                HorizontalOptions="Center"
+                Margin="0,0,0,10" />
+
+            <Label
+                Text="Tu seguridad es una prioridad.&#10;Estamos contigo en cada momento."
+                FontSize="15"
+                TextColor="#CCFFFFFF"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                LineHeight="1.5"
+                Margin="0,0,0,48" />
+
+            <!-- Botón principal: Iniciar sesión -->
+            <Button
+                Text="Iniciar sesión"
+                Command="{Binding IrALoginCommand}"
+                BackgroundColor="Transparent"
+                TextColor="White"
+                FontAttributes="Bold"
+                FontSize="16"
+                CornerRadius="12"
+                HeightRequest="54"
+                BorderColor="#80FFFFFF"
+                BorderWidth="1.5"
+                Margin="0,0,0,12" />
+
+            <!-- Botón secundario: Crear cuenta -->
+            <Button
+                Text="¿Eres nueva? Crear cuenta"
+                Command="{Binding IrARegistroCommand}"
+                BackgroundColor="Transparent"
+                TextColor="#CCFFFFFF"
+                FontSize="14"
+                CornerRadius="12"
+                HeightRequest="48"
+                BorderColor="#44FFFFFF"
+                BorderWidth="1"
+                Margin="0,0,0,24" />
+
+            <!-- Separador -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="12" Margin="0,0,0,24">
+                <BoxView WidthRequest="60" HeightRequest="1" Color="#33FFFFFF" VerticalOptions="Center"/>
+                <Label Text="o" TextColor="#66FFFFFF" FontSize="13" VerticalOptions="Center"/>
+                <BoxView WidthRequest="60" HeightRequest="1" Color="#33FFFFFF" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+
+            <!-- Denuncia anónima -->
+            <Button
+                Text="Denuncia anónima"
+                Command="{Binding IrADenunciaAnonimaCommand}"
+                BackgroundColor="#1AFFFFFF"
+                TextColor="#CCFFFFFF"
+                FontSize="14"
+                CornerRadius="12"
+                HeightRequest="46"
+                Margin="0,0,0,32" />
+
+            <!-- Badge -->
+            <Border
+                Padding="16,8"
+                StrokeShape="RoundRectangle 20"
+                Stroke="#33FFFFFF"
+                BackgroundColor="#1AFFFFFF"
+                HorizontalOptions="Center">
+                <Label
+                    Text="Plataforma segura · Ayacucho, Perú"
+                    TextColor="#CCFFFFFF"
+                    FontSize="12"
+                    FontAttributes="Bold" />
+            </Border>
+
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

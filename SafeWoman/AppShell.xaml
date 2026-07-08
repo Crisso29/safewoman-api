@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="SafeWoman.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:auth="clr-namespace:SafeWoman.Views.Auth"
+    xmlns:home="clr-namespace:SafeWoman.Views.Home"
+    xmlns:denuncia="clr-namespace:SafeWoman.Views.Denuncia"
+    xmlns:contacto="clr-namespace:SafeWoman.Views.Contacto"
+    Shell.FlyoutBehavior="Disabled"
+    Title="SafeWoman">
+
+    <!-- Ruta raíz: Welcome -->
+    <ShellContent
+        Title="Bienvenida"
+        Route="WelcomePage"
+        ContentTemplate="{DataTemplate auth:WelcomePage}" />
+
+    <!-- Home (accesible via //HomePage) -->
+    <ShellContent
+        Title="Inicio"
+        Route="HomePage"
+        ContentTemplate="{DataTemplate home:HomePage}" />
+
+</Shell>

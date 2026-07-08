@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SafeWoman.Views.Auth.RegisterPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SafeWoman.ViewModels.Auth"
+    Title=""
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- TopBar -->
+        <Grid
+            Grid.Row="0"
+            BackgroundColor="{StaticResource BrandDark}"
+            Padding="16,48,16,16">
+            <Grid ColumnDefinitions="Auto,*">
+                <Button
+                    Grid.Column="0"
+                    Text="←"
+                    BackgroundColor="#33FFFFFF"
+                    TextColor="White"
+                    FontSize="18"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    CornerRadius="20"
+                    Command="{Binding IrALoginCommand}" />
+                <VerticalStackLayout Grid.Column="1" Margin="16,0,0,0" VerticalOptions="Center">
+                    <Label Text="Crear cuenta" TextColor="White" FontSize="17" FontAttributes="Bold" />
+                    <Label Text="Datos básicos de identificación" TextColor="#CCF9E8EC" FontSize="12" />
+                </VerticalStackLayout>
+            </Grid>
+        </Grid>
+
+        <!-- Form -->
+        <ScrollView Grid.Row="1" BackgroundColor="{StaticResource BgSec}">
+            <VerticalStackLayout Padding="16,20" Spacing="12">
+
+                <Border BackgroundColor="White" Stroke="{StaticResource Border}"
+                        StrokeShape="RoundRectangle 16" Padding="18,16">
+                    <VerticalStackLayout Spacing="14">
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="NOMBRE COMPLETO *" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="2,0">
+                                <Entry Text="{Binding NombreCompleto}" Placeholder="Ingrese su nombre y apellidos"
+                                       BackgroundColor="Transparent" PlaceholderColor="#ADAEB8"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="NÚMERO DE DNI *" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="2,0">
+                                <Entry Text="{Binding Dni}" Placeholder="Ej. 47291034"
+                                       Keyboard="Numeric" MaxLength="8"
+                                       BackgroundColor="Transparent" PlaceholderColor="#ADAEB8"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="NÚMERO DE CELULAR *" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="2,0">
+                                <Entry Text="{Binding Telefono}" Placeholder="Ej. 999 000 111"
+                                       Keyboard="Telephone" MaxLength="9"
+                                       BackgroundColor="Transparent" PlaceholderColor="#ADAEB8"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="CONTRASEÑA *" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="2,0">
+                                <Entry Text="{Binding Password}" IsPassword="True" Placeholder="Cree una contraseña"
+                                       BackgroundColor="Transparent" PlaceholderColor="#ADAEB8"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Info box -->
+                <Border
+                    BackgroundColor="{StaticResource BrandLight}"
+                    Stroke="#F3D0D7"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="16">
+                    <HorizontalStackLayout Spacing="12">
+                        <Image Source="ic_message.svg" WidthRequest="20" HeightRequest="20" VerticalOptions="Start" Margin="0,2,0,0"/>
+                        <Label
+                            Text="Se enviará un código de verificación vía SMS al número ingresado."
+                            FontSize="13"
+                            TextColor="{StaticResource BrandDark}"
+                            LineHeight="1.5" />
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- RN-17: Consentimiento informado Ley N° 29733 -->
+                <Border BackgroundColor="{StaticResource BrandLight}" Stroke="#F3D0D7"
+                        StrokeShape="RoundRectangle 12" Padding="14">
+                    <HorizontalStackLayout Spacing="12">
+                        <CheckBox IsChecked="{Binding ConsentimientoLey29733}"
+                                  Color="{StaticResource BrandPrimary}" />
+                        <Label FontSize="12" TextColor="{StaticResource BrandDark}"
+                               LineHeight="1.5" VerticalOptions="Center">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Acepto el tratamiento de mis datos personales conforme a la " />
+                                    <Span Text="Ley N° 29733" FontAttributes="Bold" />
+                                    <Span Text=" (Ley de Protección de Datos Personales del Perú). Mis datos serán usados exclusivamente para los fines de SafeWoman." />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- Error -->
+                <Label
+                    Text="{Binding ErrorMessage}"
+                    TextColor="{StaticResource SosRed}"
+                    FontSize="13"
+                    IsVisible="{Binding ErrorMessage, Converter={x:StaticResource StringNotEmptyConverter}}" />
+
+                <Button
+                    Text="Crear cuenta y continuar →"
+                    Command="{Binding RegistrarCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={x:StaticResource InvertBoolConverter}}"
+                    BackgroundColor="{StaticResource BrandPrimary}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="12"
+                    HeightRequest="54" />
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource BrandPrimary}" IsVisible="{Binding IsBusy}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

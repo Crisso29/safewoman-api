@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SafeWoman.Views.Home.HomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SafeWoman.ViewModels.Home"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Grid
+            Grid.Row="0"
+            Padding="20,48,20,16">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#8B1A3A" Offset="0"/>
+                    <GradientStop Color="#A02040" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <!-- Avatar -->
+                <Border
+                    Grid.Column="0"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    StrokeShape="RoundRectangle 22"
+                    BackgroundColor="{StaticResource BrandPrimary}">
+                    <Label
+                        Text="{Binding Iniciales}"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+                <!-- Nombre -->
+                <VerticalStackLayout Grid.Column="1" Margin="12,0,0,0" VerticalOptions="Center">
+                    <Label Text="{Binding NombreVictima, StringFormat='Hola, {0}'}"
+                           TextColor="White" FontSize="18" FontAttributes="Bold" />
+                    <Label Text="Ayacucho · Protegida" TextColor="{StaticResource BrandLight}" FontSize="12" />
+                </VerticalStackLayout>
+                <!-- Settings -->
+                <Image Grid.Column="2" Source="ic_settings.svg" WidthRequest="26" HeightRequest="26" VerticalOptions="Center">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding IrAPerfilCommand}" />
+                    </Image.GestureRecognizers>
+                </Image>
+            </Grid>
+        </Grid>
+
+        <!-- Body -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="0">
+
+                <!-- SOS Zone -->
+                <VerticalStackLayout
+                    BackgroundColor="{StaticResource BgMain}"
+                    Padding="20,24"
+                    HorizontalOptions="Fill"
+                    Spacing="0">
+
+                    <Label
+                        Text="EMERGENCIA"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextMuted}"
+                        HorizontalOptions="Center"
+                        Margin="0,0,0,24" />
+
+                    <!-- Botón SOS circular -->
+                    <Button
+                        Text="SOS"
+                        Command="{Binding ActivarSosCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={x:StaticResource InvertBoolConverter}}"
+                        WidthRequest="200"
+                        HeightRequest="200"
+                        CornerRadius="100"
+                        BackgroundColor="{StaticResource SosRed}"
+                        TextColor="White"
+                        FontSize="40"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Shadow="{Shadow Brush={StaticResource SosRed}, Radius=12, Opacity=0.35}" />
+
+                    <Label
+                        Text="Mantén pulsado · Envía tu ubicación"
+                        FontSize="13"
+                        TextColor="{StaticResource TextMuted}"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Margin="0,24,0,0" />
+
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource SosRed}"
+                                       IsVisible="{Binding IsBusy}" Margin="0,8,0,0" />
+                </VerticalStackLayout>
+
+                <!-- Action Cards -->
+                <VerticalStackLayout
+                    BackgroundColor="{StaticResource BgSec}"
+                    Padding="20,20">
+
+                    <Label Text="ACCIONES" FontSize="12" FontAttributes="Bold"
+                           TextColor="{StaticResource TextMuted}" Margin="0,0,0,16" />
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                        <!-- Denuncia Formal -->
+                        <Border
+                            Grid.Column="0"
+                            BackgroundColor="{StaticResource BgMain}"
+                            Stroke="{StaticResource Border}"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="16">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding IrADenunciaFormalCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="12">
+                                <Border WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 10" BackgroundColor="#FAECE7" Stroke="Transparent">
+                                    <Image Source="ic_document.svg" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Denuncia formal" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextMain}" />
+                                    <Label Text="Con tu identidad, fines legales" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Denuncia Anónima -->
+                        <Border
+                            Grid.Column="1"
+                            BackgroundColor="{StaticResource BgMain}"
+                            Stroke="{StaticResource Border}"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="16">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding IrADenunciaAnonimaCommand}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="12">
+                                <Border WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 10" BackgroundColor="#E1F5EE" Stroke="Transparent">
+                                    <Image Source="ic_person_anon.svg" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Denuncia anónima" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextMain}" />
+                                    <Label Text="Sin revelar tu identidad" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+
+                    </Grid>
+
+                    <!-- Estado del sistema -->
+                    <Label Text="ESTADO DEL SISTEMA" FontSize="12" FontAttributes="Bold"
+                           TextColor="{StaticResource TextMuted}" Margin="0,24,0,16" />
+
+                    <Border BackgroundColor="{StaticResource BgMain}" Stroke="{StaticResource Border}"
+                            StrokeShape="RoundRectangle 16" Padding="16">
+                        <VerticalStackLayout Spacing="12">
+                            <HorizontalStackLayout Spacing="10">
+                                <Border WidthRequest="10" HeightRequest="10" StrokeShape="RoundRectangle 5" BackgroundColor="#1D9E75" Stroke="Transparent" VerticalOptions="Center"/>
+                                <Label Text="GPS Localizado" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource TextMain}" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <HorizontalStackLayout Spacing="8">
+                                    <Image Source="nav_users_on.svg" WidthRequest="18" HeightRequest="18" VerticalOptions="Center"/>
+                                    <Label Text="{Binding CantidadContactos, StringFormat='{0} contactos agregados'}"
+                                           FontSize="13" FontAttributes="Bold" TextColor="{StaticResource TextMain}"
+                                           VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                                <Button Grid.Column="1" Text="Gestionar"
+                                        Command="{Binding IrAContactosCommand}"
+                                        BackgroundColor="{StaticResource BrandLight}"
+                                        TextColor="{StaticResource BrandPrimary}"
+                                        FontSize="12" FontAttributes="Bold"
+                                        CornerRadius="8" Padding="12,6" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom nav — borde superior en lugar de Shadow (Shadow en Grid cuesta mucho en Android) -->
+        <BoxView Grid.Row="2" HeightRequest="1"
+                 BackgroundColor="{StaticResource Border}"
+                 VerticalOptions="Start"/>
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*"
+              BackgroundColor="{StaticResource BgMain}"
+              Padding="0,8,0,20"
+              x:Name="BottomNav">
+
+            <!-- Tab Inicio (activo) -->
+            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" Spacing="4">
+                <Image Source="nav_home_on.svg" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center"/>
+                <Label Text="Inicio" FontSize="11" FontAttributes="Bold"
+                       TextColor="{StaticResource BrandPrimary}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Tab Denuncias -->
+            <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding IrADenunciaFormalCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Image Source="nav_list.svg" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center"/>
+                <Label Text="Denuncias" FontSize="11" TextColor="{StaticResource TextMuted}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Tab Contactos -->
+            <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding IrAContactosCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Image Source="nav_users.svg" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center"/>
+                <Label Text="Contactos" FontSize="11" TextColor="{StaticResource TextMuted}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Tab Perfil -->
+            <VerticalStackLayout Grid.Column="3" HorizontalOptions="Center" Spacing="4">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding IrAPerfilCommand}" />
+                </VerticalStackLayout.GestureRecognizers>
+                <Image Source="nav_person.svg" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center"/>
+                <Label Text="Perfil" FontSize="11" TextColor="{StaticResource TextMuted}" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+    </Grid>
+</ContentPage>

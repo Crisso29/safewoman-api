@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="456" height="456" viewBox="0 0 456 456" xmlns="http://www.w3.org/2000/svg">
+  <!-- Escudo blanco centrado para splash -->
+  <path d="M228 62 L366 118 L366 246
+           C366 326 306 390 228 416
+           C150 390 90 326 90 246
+           L90 118 Z"
+        fill="white"/>
+  <!-- Corazón en color marca -->
+  <path d="M228 322
+           C228 322 144 272 144 212
+           C144 174 171 150 200 150
+           C215 150 228 165 228 165
+           C228 165 241 150 256 150
+           C285 150 312 174 312 212
+           C312 272 228 322 228 322 Z"
+        fill="#8B1A3A"/>
+</svg>

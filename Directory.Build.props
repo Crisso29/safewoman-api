@@ -1,0 +1,22 @@
+<Project>
+  <!--
+    Configuración común a todos los proyectos de la solución.
+    Cualquier propiedad definida aquí se hereda por cada .csproj bajo esta carpeta.
+
+    RestorePackagesWithLockFile:
+      Genera un packages.lock.json por proyecto con el árbol EXACTO de dependencias
+      resueltas (directas + transitivas). Comprometido al repositorio, garantiza que
+      compilar en otra máquina o tras una actualización de SDK/workload use las
+      mismas versiones bit a bit.
+
+    RestoreLockedMode:
+      En CI/Release, si el lockfile difiere del árbol resuelto, la restauración falla.
+      En Debug local se deja libre para no bloquear al desarrollador al añadir paquetes;
+      cuando eso pase, ejecutar la restauración con la bandera force evaluate regenera
+      el lockfile (dotnet restore /p:RestoreForceEvaluate=true).
+  -->
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(Configuration)' == 'Release' or '$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
+  </PropertyGroup>
+</Project>

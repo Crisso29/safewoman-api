@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SafeWoman.Views.Home.SosActivePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:SafeWoman.ViewModels.Home"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource SosDark}">
+
+    <VerticalStackLayout
+        Padding="40,80,40,40"
+        VerticalOptions="Center"
+        Spacing="0">
+
+        <!-- Ring animado -->
+        <Border
+            WidthRequest="200"
+            HeightRequest="200"
+            StrokeShape="RoundRectangle 100"
+            BackgroundColor="#4DE53935"
+            HorizontalOptions="Center"
+            Margin="0,0,0,40">
+            <Border
+                WidthRequest="130"
+                HeightRequest="130"
+                StrokeShape="RoundRectangle 65"
+                BackgroundColor="{StaticResource SosRed}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="2">
+                    <Label Text="SOS" FontSize="30" FontAttributes="Bold" TextColor="White"
+                           HorizontalOptions="Center" />
+                    <Label Text="ACTIVO" FontSize="11" FontAttributes="Bold" TextColor="#FFCDD2"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Border>
+        </Border>
+
+        <Label Text="¡Alerta enviada!" FontSize="26" FontAttributes="Bold" TextColor="White"
+               HorizontalOptions="Center" Margin="0,0,0,12" />
+
+        <Label
+            Text="Tu ubicación está siendo compartida con tus contactos de emergencia y la central de monitoreo."
+            FontSize="14"
+            TextColor="#FFCDD2"
+            HorizontalOptions="Center"
+            HorizontalTextAlignment="Center"
+            LineHeight="1.5"
+            Margin="0,0,0,40" />
+
+        <!-- Steps -->
+        <Border BackgroundColor="#33000000" Stroke="#33FFFFFF" StrokeShape="RoundRectangle 12" Padding="16" Margin="0,0,0,12">
+            <HorizontalStackLayout Spacing="16">
+                <Image Source="ic_pin.svg" WidthRequest="22" HeightRequest="22" VerticalOptions="Center"/>
+                <Label Text="{Binding CoordenadasTexto}" FontSize="14" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </Border>
+
+        <Border BackgroundColor="#33000000" Stroke="#33FFFFFF" StrokeShape="RoundRectangle 12" Padding="16" Margin="0,0,0,12">
+            <HorizontalStackLayout Spacing="16">
+                <Image Source="ic_chat.svg" WidthRequest="22" HeightRequest="22" VerticalOptions="Center"/>
+                <Label Text="{Binding ContactosTexto}" FontSize="14" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </Border>
+
+        <Border BackgroundColor="#33000000" Stroke="#33FFFFFF" StrokeShape="RoundRectangle 12" Padding="16" Margin="0,0,0,40">
+            <HorizontalStackLayout Spacing="16">
+                <Image Source="ic_bell.svg" WidthRequest="22" HeightRequest="22" VerticalOptions="Center"/>
+                <Label Text="Alerta enviada a la central" FontSize="14" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </Border>
+
+        <Button
+            Text="Cancelar alerta"
+            Command="{Binding CancelarAlertaCommand}"
+            BackgroundColor="Transparent"
+            TextColor="White"
+            FontSize="16"
+            FontAttributes="Bold"
+            BorderColor="#66FFFFFF"
+            BorderWidth="1.5"
+            CornerRadius="12"
+            HeightRequest="54" />
+
+        <ActivityIndicator IsRunning="{Binding IsCancelling}" Color="White"
+                           IsVisible="{Binding IsCancelling}" Margin="0,16,0,0" />
+
+    </VerticalStackLayout>
+</ContentPage>

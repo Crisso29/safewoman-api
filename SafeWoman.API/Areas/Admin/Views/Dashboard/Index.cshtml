@@ -1,0 +1,293 @@
+@model SafeWoman.Application.DTOs.Admin.AdminDashboardDto
+@{
+    ViewBag.Title = "Dashboard";
+    var hora = DateTime.Now.Hour;
+    var saludo = hora < 12 ? "Buenos días" : hora < 18 ? "Buenas tardes" : "Buenas noches";
+    var nombre = User.Identity?.Name ?? "Administrador";
+    var primerNombre = nombre.Split(' ')[0];
+}
+
+@section Styles {
+<style>
+/* Stat card SOS: fondo degradado */
+.sw-stat-sos {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFF7F8 100%);
+    border-color: #FECACA !important;
+    box-shadow: 0 1px 2px rgba(239,68,68,0.06) !important;
+    position: relative; overflow: hidden;
+}
+.sw-stat-sos::before {
+    content: '';
+    position: absolute; top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(239,68,68,0.08), transparent 70%);
+    border-radius: 50%;
+}
+/* Live badge inline */
+.sw-live-inline {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; color: #B91C1C; font-weight: 700;
+}
+.sw-stat-trend-up  { color: #059669; display: flex; align-items: center; gap: 4px; }
+.sw-stat-trend-neu { color: #9CA3AF; display: flex; align-items: center; gap: 4px; }
+</style>
+}
+
+<!-- Page header -->
+<div class="d-flex align-items-end justify-content-between mb-4">
+    <div>
+        <h1 style="font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.02em">@saludo, @primerNombre</h1>
+        <p style="font-size:13px;color:#6B7280;margin:0">Resumen general del sistema SafeWoman — Ayacucho</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a href="/Admin/Victimas" class="sw-btn sw-btn-ghost" style="font-size:12.5px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6m3-3h-6"></path></svg>
+            Ver víctimas
+        </a>
+        <a href="/Admin/Alertas" class="sw-btn sw-btn-brand" style="font-size:12.5px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12a5 5 0 0 1 5-5v0a5 5 0 0 1 5 5v6H7v-6Z"></path><path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2H5v-2Z"></path></svg>
+            Ver alertas
+        </a>
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+
+    <!-- Víctimas activas -->
+    <div class="col-6 col-xl">
+        <div class="sw-stat">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="sw-stat-icon" style="background:#FDF2F4;color:#8B1A3A">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <span style="font-size:11px;color:#9CA3AF;font-weight:500">total</span>
+            </div>
+            <div class="sw-stat-val">@Model.TotalVictimas</div>
+            <div class="sw-stat-lbl mt-1">Usuarios registrados</div>
+            <div class="sw-stat-trend-up mt-2" style="font-size:11.5px;font-weight:600">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="19" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                Este mes
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas SOS -->
+    <div class="col-6 col-xl">
+        <div class="sw-stat sw-stat-sos">
+            <div class="d-flex align-items-center justify-content-between mb-3" style="position:relative">
+                <div class="sw-stat-icon" style="background:#FEE2E2;color:#B91C1C">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12a5 5 0 0 1 5-5v0a5 5 0 0 1 5 5v6H7v-6Z"></path><path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2H5v-2Z"></path><path d="M21 12h1"></path><path d="M2 12h1"></path><path d="M12 2v1"></path></svg>
+                </div>
+                <span class="sw-live-inline" style="position:relative">
+                    <span style="position:relative;width:7px;height:7px;display:inline-block">
+                        <span style="position:absolute;inset:0;background:#EF4444;border-radius:50%;animation:swPulseDot 1.4s ease-in-out infinite"></span>
+                        <span style="position:absolute;inset:-4px;background:#EF4444;border-radius:50%;opacity:0.35;animation:swPulseRing 1.6s ease-out infinite"></span>
+                    </span>
+                    EN VIVO
+                </span>
+            </div>
+            <div class="sw-stat-val" id="alertas-count" style="color:#B91C1C;position:relative">@Model.AlertasActivas</div>
+            <div class="sw-stat-lbl mt-1" style="position:relative">Alertas SOS activas</div>
+            <div style="margin-top:8px;font-size:11.5px;color:#B91C1C;font-weight:600;position:relative">Requiere atención inmediata</div>
+        </div>
+    </div>
+
+    <!-- Denuncias hoy -->
+    <div class="col-6 col-xl">
+        <div class="sw-stat">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="sw-stat-icon" style="background:#F0F9FF;color:#0369A1">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line><path d="m9 16 2 2 4-4"></path></svg>
+                </div>
+                <span style="font-size:11px;color:#9CA3AF;font-weight:500">hoy</span>
+            </div>
+            <div class="sw-stat-val" style="color:#0369A1">@Model.DenunciasHoy</div>
+            <div class="sw-stat-lbl mt-1">Denuncias recibidas hoy</div>
+            <div class="sw-stat-trend-neu mt-2" style="font-size:11.5px;font-weight:500">
+                <a href="/Admin/Denuncias" style="color:#0369A1;text-decoration:none;font-weight:600">Ver todas →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Denuncias pendientes -->
+    <div class="col-6 col-xl">
+        <div class="sw-stat">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="sw-stat-icon" style="background:#FEF3C7;color:#B45309">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <span style="font-size:11px;color:#9CA3AF;font-weight:500">pendientes</span>
+            </div>
+            <div class="sw-stat-val" style="color:#B45309">@Model.DenunciasPendientes</div>
+            <div class="sw-stat-lbl mt-1">Denuncias pendientes</div>
+            <div class="sw-stat-trend-neu mt-2" style="font-size:11.5px;font-weight:500">
+                @(Model.DenunciasPendientes == 0 ? "Todo atendido" : "Requieren revisión")
+            </div>
+        </div>
+    </div>
+
+    <!-- Dispositivos bloqueados -->
+    <div class="col-6 col-xl">
+        <div class="sw-stat">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="sw-stat-icon" style="background:#EFF6FF;color:#1D4ED8">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg>
+                </div>
+                <span style="font-size:11px;color:#9CA3AF;font-weight:500">bloqueados</span>
+            </div>
+            <div class="sw-stat-val" style="color:#1D4ED8">@Model.DispositivosBloqueados</div>
+            <div class="sw-stat-lbl mt-1">Dispositivos bloqueados</div>
+            <div class="sw-stat-trend-neu mt-2" style="font-size:11.5px;font-weight:500">
+                <a href="/Admin/Denuncias/Dispositivos" style="color:#1D4ED8;text-decoration:none;font-weight:600">Gestionar →</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Alertas recientes -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="sw-card">
+            <div class="sw-card-header">
+                <div class="d-flex align-items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12a5 5 0 0 1 5-5v0a5 5 0 0 1 5 5v6H7v-6Z"></path><path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2H5v-2Z"></path><path d="M12 2v1"></path></svg>
+                    <span class="sw-card-title">Alertas SOS recientes</span>
+                    <span class="sw-live-badge ms-1" id="live-indicator" style="display:none">
+                        <span class="sw-live-dot"></span>En vivo
+                    </span>
+                </div>
+                <a href="/Admin/Alertas" class="sw-btn sw-btn-ghost" style="font-size:.78rem;padding:.35rem .75rem">
+                    Ver todas
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="sw-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Víctima</th>
+                            <th>Teléfono</th>
+                            <th>Ubicación</th>
+                            <th>Activación</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="alertas-body">
+                    @if (!Model.AlertasRecientes.Any())
+                    {
+                        <tr>
+                            <td colspan="6">
+                                <div class="sw-empty">
+                                    <div class="sw-empty-icon">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+                                    </div>
+                                    <div class="fw-semibold" style="color:#374151">Sin alertas activas</div>
+                                    <p>El sistema está en calma. Todas las alertas han sido atendidas.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var a in Model.AlertasRecientes)
+                    {
+                        <tr>
+                            <td><span style="font-size:.72rem;color:#D1D5DB;font-weight:600">#@a.IdAlerta</span></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="sw-avt" style="width:32px;height:32px;background:#FDE8EC;font-size:.72rem;color:#8B1A3A">
+                                        @(a.NombreVictima.Length > 0 ? a.NombreVictima[0].ToString().ToUpper() : "V")
+                                    </div>
+                                    <span class="fw-semibold" style="font-size:.84rem">@a.NombreVictima</span>
+                                </div>
+                            </td>
+                            <td style="font-size:.82rem;color:#6B7280">@a.TelefonoVictima</td>
+                            <td>
+                                <a href="https://maps.google.com/?q=@a.Latitud.ToString("F7", System.Globalization.CultureInfo.InvariantCulture),@a.Longitud.ToString("F7", System.Globalization.CultureInfo.InvariantCulture)"
+                                   target="_blank" class="d-inline-flex align-items-center gap-1 text-decoration-none"
+                                   style="font-size:.78rem;color:#8B1A3A;background:#FDE8EC;padding:.22rem .55rem;border-radius:20px;transition:background .15s"
+                                   onmouseover="this.style.background='#F7C5D0'" onmouseout="this.style.background='#FDE8EC'">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+                                    @a.Latitud.ToString("F4")°, @a.Longitud.ToString("F4")°
+                                </a>
+                            </td>
+                            <td style="font-size:.78rem;color:#9CA3AF;white-space:nowrap">
+                                @a.TimestampActivacion.ToLocalTime().ToString("dd/MM HH:mm")
+                            </td>
+                            <td>
+                                <span class="sw-badge sw-badge-@a.Estado.ToLower()">
+                                    <span class="sw-dot"></span>@a.Estado
+                                </span>
+                            </td>
+                            <td>
+                            @if (a.Estado == "Activa")
+                            {
+                                <form asp-action="AtenderAlerta" asp-controller="Alertas" asp-area="Admin" method="post" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@a.IdAlerta" />
+                                    <input type="hidden" name="returnTo" value="Dashboard" />
+                                    <button type="submit" class="sw-btn sw-btn-ghost" style="font-size:.73rem;padding:.25rem .65rem;color:#15803d;border-color:#bbf7d0"
+                                            title="Marcar como atendida" onclick="return confirm('¿Marcar esta alerta como atendida?')">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        Atendida
+                                    </button>
+                                </form>
+                            }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function onNuevaAlerta(data) {
+    const countEl = document.getElementById("alertas-count");
+    if (countEl) countEl.textContent = parseInt(countEl.textContent || "0") + 1;
+
+    const li = document.getElementById("live-indicator");
+    if (li) li.style.display = "inline-flex";
+
+    const tbody = document.getElementById("alertas-body");
+    const row = document.createElement("tr");
+    row.style.cssText = "animation:swFadeIn .4s ease both;background:#fff8f9";
+    row.innerHTML = `
+        <td><span style="font-size:.72rem;color:#D1D5DB;font-weight:600">#${data.idAlerta}</span></td>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <div class="sw-avt" style="width:32px;height:32px;background:#FDE8EC;font-size:.72rem;color:#8B1A3A">
+              ${(data.nombreVictima?.[0] || 'V').toUpperCase()}
+            </div>
+            <span class="fw-semibold" style="font-size:.84rem">${data.nombreVictima}</span>
+          </div>
+        </td>
+        <td style="font-size:.82rem;color:#6B7280">${data.telefono}</td>
+        <td>
+          <a href="https://maps.google.com/?q=${data.lat},${data.lng}" target="_blank"
+             class="d-inline-flex align-items-center gap-1 text-decoration-none"
+             style="font-size:.78rem;color:#8B1A3A;background:#FDE8EC;padding:.22rem .55rem;border-radius:20px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+            ${parseFloat(data.lat).toFixed(4)}°, ${parseFloat(data.lng).toFixed(4)}°
+          </a>
+        </td>
+        <td style="font-size:.78rem;color:#9CA3AF;white-space:nowrap">Ahora mismo</td>
+        <td><span class="sw-badge sw-badge-activa"><span class="sw-dot"></span>Activa</span></td>
+    `;
+    tbody.insertBefore(row, tbody.firstChild);
+
+    const emptyRow = tbody.querySelector('.sw-empty');
+    if (emptyRow) emptyRow.closest('tr').remove();
+}
+
+function onAlertaCancelada(data) {
+    const el = document.getElementById("alertas-count");
+    if (el) el.textContent = Math.max(0, parseInt(el.textContent || "1") - 1);
+}
+</script>
+}

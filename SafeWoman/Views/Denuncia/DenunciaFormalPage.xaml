@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SafeWoman.Views.Denuncia.DenunciaFormalPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- TopBar con gradiente -->
+        <Grid Grid.Row="0" Padding="16,48,16,16">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#8B1A3A" Offset="0"/>
+                    <GradientStop Color="#A02040" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <Button Grid.Column="0" Text="←" BackgroundColor="#33FFFFFF" TextColor="White"
+                        FontSize="18" WidthRequest="40" HeightRequest="40" CornerRadius="20"
+                        Command="{Binding VolverCommand}" />
+                <VerticalStackLayout Grid.Column="1" Margin="16,0,0,0" VerticalOptions="Center">
+                    <Label Text="Denuncia formal" TextColor="White" FontSize="17" FontAttributes="Bold" />
+                    <Label Text="Formulario con identidad verificada" TextColor="#CCF9E8EC" FontSize="12" />
+                </VerticalStackLayout>
+                <Border Grid.Column="2" BackgroundColor="#44FFFFFF" Stroke="#44FFFFFF"
+                        StrokeShape="RoundRectangle 12" Padding="10,5">
+                    <Label Text="Formal" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Contenido -->
+        <ScrollView Grid.Row="1" BackgroundColor="{StaticResource BgSec}">
+            <VerticalStackLayout Padding="16,20" Spacing="12">
+
+                <!-- ═══ SECCIÓN 1: Datos del denunciante ═══ -->
+                <Border BackgroundColor="White" Stroke="{StaticResource Border}"
+                        StrokeShape="RoundRectangle 16" Padding="18,16">
+                    <VerticalStackLayout Spacing="14">
+                        <HorizontalStackLayout Spacing="10">
+                            <Border WidthRequest="22" HeightRequest="22" BackgroundColor="{StaticResource BrandPrimary}"
+                                    StrokeShape="RoundRectangle 11" Stroke="Transparent">
+                                <Label Text="1" FontSize="11" FontAttributes="Bold" TextColor="White"
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <Label Text="Datos del denunciante" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{StaticResource BrandDark}" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <BoxView HeightRequest="1" Color="#FFCDD2" Margin="0,0,0,4"/>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="NOMBRE COMPLETO *" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <!-- Se autocompleta desde el perfil al abrir la página,
+                                 pero el usuario puede editar si necesita corregir. -->
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="2,0">
+                                <Entry Text="{Binding NombreDenunciante}"
+                                       Placeholder="Su nombre completo"
+                                       MaxLength="200" Keyboard="Text"
+                                       BackgroundColor="Transparent"
+                                       TextColor="{StaticResource TextMain}" PlaceholderColor="#CCCCCC"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="6">
+                                <Label Text="DNI *" FontSize="10" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                                <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="White" Padding="2,0">
+                                    <Entry Text="{Binding DniDenunciante}"
+                                           Placeholder="8 dígitos"
+                                           MaxLength="8" Keyboard="Numeric"
+                                           BackgroundColor="Transparent"
+                                           TextColor="{StaticResource TextMain}" PlaceholderColor="#CCCCCC"/>
+                                </Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                <Label Text="CELULAR *" FontSize="10" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                                <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="White" Padding="2,0">
+                                    <Entry Text="{Binding TelefonoDenunciante}"
+                                           Placeholder="9 dígitos"
+                                           MaxLength="9" Keyboard="Telephone"
+                                           BackgroundColor="Transparent"
+                                           TextColor="{StaticResource TextMain}" PlaceholderColor="#CCCCCC"/>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="FOTO DEL DNI *" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Button Text="📷 Adjuntar foto del DNI"
+                                    Command="{Binding ElegirFotoDniCommand}"
+                                    BackgroundColor="{StaticResource BrandPrimary}" TextColor="White"
+                                    CornerRadius="8" FontSize="13" HeightRequest="46"/>
+                            <!-- Badge de confirmación: aparece tras seleccionar la foto -->
+                            <Border BackgroundColor="{StaticResource BrandLight}" Stroke="#F3D0D7"
+                                    StrokeShape="RoundRectangle 8" Padding="10,8"
+                                    IsVisible="{Binding FotoDniPath, Converter={x:StaticResource StringNotEmptyConverter}}">
+                                <HorizontalStackLayout Spacing="8">
+                                    <Label Text="✅" FontSize="14" VerticalOptions="Center"/>
+                                    <Label Text="{Binding FotoDniPath}" FontSize="12"
+                                           TextColor="{StaticResource BrandDark}" VerticalOptions="Center"
+                                           LineBreakMode="TailTruncation"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ═══ SECCIÓN 2: Datos del denunciado ═══ -->
+                <Border BackgroundColor="White" Stroke="{StaticResource Border}"
+                        StrokeShape="RoundRectangle 16" Padding="18,16">
+                    <VerticalStackLayout Spacing="14">
+                        <HorizontalStackLayout Spacing="10">
+                            <Border WidthRequest="22" HeightRequest="22" BackgroundColor="{StaticResource BrandPrimary}"
+                                    StrokeShape="RoundRectangle 11" Stroke="Transparent">
+                                <Label Text="2" FontSize="11" FontAttributes="Bold" TextColor="White"
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <Label Text="Datos del denunciado" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{StaticResource BrandDark}" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <BoxView HeightRequest="1" Color="#FFCDD2" Margin="0,0,0,4"/>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="NOMBRE / ALIAS" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Label Text="Puede incluir nombre, apellidos, alias o usuario en redes sociales."
+                                   FontSize="11" TextColor="{StaticResource TextMuted}" LineHeight="1.4"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="2,0">
+                                <Entry Text="{Binding NombreAliasDenunciado}" Placeholder="Nombre, apellidos o alias"
+                                       MaxLength="200" Keyboard="Text"
+                                       BackgroundColor="Transparent" PlaceholderColor="#CCCCCC"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="RELACIÓN CON LA VÍCTIMA" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="4,0">
+                                <Picker Title="Seleccione" ItemsSource="{Binding Relaciones}"
+                                        SelectedItem="{Binding RelacionDenunciado}"
+                                        BackgroundColor="Transparent"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ═══ SECCIÓN 3: Ubicación del hecho ═══ -->
+                <Border BackgroundColor="White" Stroke="{StaticResource Border}"
+                        StrokeShape="RoundRectangle 16" Padding="18,16">
+                    <VerticalStackLayout Spacing="14">
+                        <HorizontalStackLayout Spacing="10">
+                            <Border WidthRequest="22" HeightRequest="22" BackgroundColor="{StaticResource BrandPrimary}"
+                                    StrokeShape="RoundRectangle 11" Stroke="Transparent">
+                                <Label Text="3" FontSize="11" FontAttributes="Bold" TextColor="White"
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <Label Text="Ubicación del hecho" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{StaticResource BrandDark}" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <BoxView HeightRequest="1" Color="#FFCDD2" Margin="0,0,0,4"/>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="6">
+                                <Label Text="FECHA *" FontSize="10" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                                <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="White" Padding="4,0">
+                                    <DatePicker Date="{Binding FechaHecho}" Format="dd/MM/yyyy"
+                                                BackgroundColor="Transparent"/>
+                                </Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                <Label Text="HORA *" FontSize="10" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                                <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="White" Padding="4,0">
+                                    <TimePicker Time="{Binding HoraHecho}" Format="HH:mm"
+                                                BackgroundColor="Transparent"/>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="6">
+                                <Label Text="DEPARTAMENTO" FontSize="10" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                                <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="White" Padding="2,0">
+                                    <Entry Text="{Binding Departamento}"
+                                           MaxLength="100" Keyboard="Text"
+                                           BackgroundColor="Transparent"
+                                           TextColor="{StaticResource TextMain}"/>
+                                </Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                <Label Text="PROVINCIA" FontSize="10" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                                <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="White" Padding="2,0">
+                                    <Entry Text="{Binding Provincia}" Placeholder="Provincia"
+                                           MaxLength="100" Keyboard="Text"
+                                           BackgroundColor="Transparent" PlaceholderColor="#CCCCCC"/>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="DISTRITO" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="2,0">
+                                <Entry Text="{Binding Distrito}" Placeholder="Distrito"
+                                       MaxLength="100" Keyboard="Text"
+                                       BackgroundColor="Transparent" PlaceholderColor="#CCCCCC"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="REFERENCIA DE LA UBICACIÓN" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Label Text="Ingrese una referencia (calle, barrio, zona) y toque 'Ubicar en mapa'. Google Maps la geocodificará automáticamente."
+                                   FontSize="11" TextColor="{StaticResource TextMuted}" LineHeight="1.4"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="2,0">
+                                <Entry Text="{Binding ReferenciaUbicacion}"
+                                       Placeholder="Ej. Jr. Lima cuadra 3, Huamanga"
+                                       MaxLength="500" Keyboard="Text" ReturnType="Search"
+                                       BackgroundColor="Transparent" PlaceholderColor="#CCCCCC"/>
+                            </Border>
+
+                            <!-- Dropdown de sugerencias (autocomplete). Aparece mientras el usuario escribe. -->
+                            <Border IsVisible="{Binding MostrarSugerencias}"
+                                    BackgroundColor="White" Stroke="{StaticResource Border}"
+                                    StrokeShape="RoundRectangle 8" MaximumHeightRequest="220" Padding="0">
+                                <CollectionView ItemsSource="{Binding Sugerencias}" SelectionMode="None">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="12,10" ColumnDefinitions="Auto,*"
+                                                  BackgroundColor="Transparent">
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ElegirSugerenciaCommand}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Grid.GestureRecognizers>
+                                                <Label Grid.Column="0" Text="📍" FontSize="14"
+                                                       Margin="0,0,10,0" VerticalOptions="Center"/>
+                                                <Label Grid.Column="1" Text="{Binding NombreLugar}"
+                                                       FontSize="12" LineBreakMode="TailTruncation"
+                                                       MaxLines="2" VerticalOptions="Center"
+                                                       TextColor="{StaticResource TextMain}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Border>
+
+                            <Button Text="📍 Ubicar en el mapa"
+                                    Command="{Binding CapturarUbicacionCommand}"
+                                    IsEnabled="{Binding IsBusy, Converter={x:StaticResource InvertBoolConverter}}"
+                                    BackgroundColor="{StaticResource BrandDark}" TextColor="White"
+                                    CornerRadius="8" FontSize="13" HeightRequest="44"/>
+                        </VerticalStackLayout>
+
+                        <!-- Tarjeta de ubicación confirmada — estilo Airbnb/Uber: banner visual + dirección + botón a Google Maps.
+                             Eliminamos el WebView embebido de OSM porque los tiles no cargan de forma consistente
+                             (User-Agent del WebView Android no aceptado por tile.openstreetmap.org). El botón abre
+                             Google Maps nativo, que es la mejor experiencia de mapa posible en el dispositivo. -->
+                        <Border BackgroundColor="White" Stroke="{StaticResource Border}"
+                                StrokeShape="RoundRectangle 12" Padding="0"
+                                IsVisible="{Binding UbicacionCapturada}">
+                            <VerticalStackLayout Spacing="0">
+                                <!-- Banner superior con gradiente e ícono grande -->
+                                <Grid HeightRequest="110">
+                                    <Grid.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="{StaticResource BrandPrimary}" Offset="0"/>
+                                            <GradientStop Color="{StaticResource BrandDark}" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Grid.Background>
+                                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="4">
+                                        <Label Text="📍" FontSize="42" HorizontalOptions="Center"/>
+                                        <Label Text="Ubicación confirmada" TextColor="White"
+                                               FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                                <!-- Dirección resuelta + coordenadas -->
+                                <VerticalStackLayout Padding="16,12,16,14" Spacing="6">
+                                    <Label Text="DIRECCIÓN"
+                                           FontSize="9" FontAttributes="Bold"
+                                           TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                                    <Label Text="{Binding DireccionResuelta}"
+                                           TextColor="{StaticResource TextMain}"
+                                           FontSize="13" LineHeight="1.4"
+                                           IsVisible="{Binding DireccionResuelta, Converter={x:StaticResource StringNotEmptyConverter}}"/>
+                                    <Label TextColor="{StaticResource TextMuted}" FontSize="11" Margin="0,2,0,0">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="🧭 "/>
+                                                <Span Text="{Binding Latitud, StringFormat='{0:F6}, '}"/>
+                                                <Span Text="{Binding Longitud, StringFormat='{0:F6}'}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Button Text="🗺  Ver en Google Maps"
+                                            Command="{Binding AbrirMapaCommand}"
+                                            BackgroundColor="{StaticResource BrandPrimary}" TextColor="White"
+                                            CornerRadius="8" FontSize="13" FontAttributes="Bold"
+                                            HeightRequest="46" Margin="0,8,0,0"/>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Mapa interactivo con Leaflet + CartoDB.
+                             Se muestra solo cuando ya hay ubicación (MostrarMapa=true) para
+                             evitar el ANR de Chromium al abrir la página en frío. El usuario
+                             toca el mapa o arrastra el pin para ajustar la ubicación exacta. -->
+                        <!-- Mapa interactivo Leaflet + CartoDB con pin fijo en el centro (estilo Uber).
+                             Se muestra solo cuando hay ubicación para evitar ANR de Chromium al arrancar. -->
+                        <VerticalStackLayout IsVisible="{Binding MostrarMapa}" Spacing="6">
+                            <Label Text="AJUSTAR UBICACIÓN EXACTA"
+                                   FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Label Text="Mueva el mapa para colocar el pin exactamente sobre el lugar del hecho."
+                                   FontSize="11" TextColor="{StaticResource TextMuted}" LineHeight="1.4"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 12"
+                                    Padding="0" HeightRequest="480">
+                                <WebView x:Name="MapaWebView"
+                                         Source="{Binding MapaSource}"
+                                         HeightRequest="480"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ═══ SECCIÓN 4: Descripción y evidencias ═══ -->
+                <Border BackgroundColor="White" Stroke="{StaticResource Border}"
+                        StrokeShape="RoundRectangle 16" Padding="18,16">
+                    <VerticalStackLayout Spacing="14">
+                        <HorizontalStackLayout Spacing="10">
+                            <Border WidthRequest="22" HeightRequest="22" BackgroundColor="{StaticResource BrandPrimary}"
+                                    StrokeShape="RoundRectangle 11" Stroke="Transparent">
+                                <Label Text="4" FontSize="11" FontAttributes="Bold" TextColor="White"
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                            <Label Text="Descripción de los hechos" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{StaticResource BrandDark}" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <BoxView HeightRequest="1" Color="#FFCDD2" Margin="0,0,0,4"/>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="DESCRIPCIÓN DETALLADA *" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Label Text="Incluya nombres, características físicas, hechos ocurridos y toda información relevante."
+                                   FontSize="11" TextColor="{StaticResource TextMuted}" LineHeight="1.4"/>
+                            <!-- Editor multilínea con altura FIJA (no AutoSize).
+                                 AutoSize=TextChanges recalcula el layout en cada keystroke y en Android
+                                 corta la composición de caracteres compuestos del IME español (ñ, tildes).
+                                 Con altura fija, el Editor scrollea internamente y no rompe la composición. -->
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="White" Padding="0">
+                                <Editor Text="{Binding Descripcion}" Placeholder="Describa los hechos aquí..."
+                                        HeightRequest="200" MaxLength="2000" Keyboard="Plain"
+                                        IsSpellCheckEnabled="False" IsTextPredictionEnabled="False"
+                                        Margin="10,6"
+                                        BackgroundColor="Transparent" PlaceholderColor="#CCCCCC"/>
+                            </Border>
+                            <!-- Contador simple de caracteres, ayuda al usuario a ver que puede escribir mucho más -->
+                            <Label Text="{Binding Descripcion.Length, StringFormat='{0}/2000 caracteres'}"
+                                   FontSize="10" TextColor="{StaticResource TextMuted}"
+                                   HorizontalOptions="End"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="EVIDENCIAS (OPCIONAL)" FontSize="10" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}" CharacterSpacing="0.5"/>
+                            <Border Stroke="{StaticResource Border}" StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="{StaticResource BgSec}" Padding="0">
+                                <Button Text="Adjuntar foto, video o documento"
+                                        Command="{Binding AgregarEvidenciaCommand}"
+                                        IsEnabled="{Binding IsBusy, Converter={x:StaticResource InvertBoolConverter}}"
+                                        BackgroundColor="Transparent" TextColor="{StaticResource BrandDark}"
+                                        FontSize="13" HeightRequest="48"/>
+                            </Border>
+                            <CollectionView ItemsSource="{Binding Evidencias}">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <HorizontalStackLayout Spacing="8" Padding="0,4">
+                                            <Image Source="ic_document.svg" WidthRequest="18" HeightRequest="18" VerticalOptions="Center"/>
+                                            <Label Text="{Binding FileName}" FontSize="13"
+                                                   TextColor="{StaticResource TextMain}" VerticalOptions="Center"
+                                                   HorizontalOptions="FillAndExpand" LineBreakMode="TailTruncation"/>
+                                            <Button Text="✕" FontSize="11"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.QuitarEvidenciaCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="Transparent" TextColor="{StaticResource SosRed}"
+                                                    Padding="4,0" WidthRequest="30" HeightRequest="30"/>
+                                        </HorizontalStackLayout>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ═══ Declaración jurada ═══ -->
+                <Border BackgroundColor="#FFF8E1" Stroke="#FFE082" StrokeShape="RoundRectangle 16" Padding="16">
+                    <HorizontalStackLayout Spacing="12">
+                        <CheckBox IsChecked="{Binding DeclaracionJurada}" Color="{StaticResource BrandPrimary}" VerticalOptions="Start"/>
+                        <Label Text="Declaración jurada: Declaro que la información es verídica. Soy consciente que una denuncia falsa constituye delito (Art. 402°–438° del Código Penal peruano)."
+                               FontSize="12" TextColor="#4E342E" LineHeight="1.6" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource SosRed}" FontSize="13"
+                       IsVisible="{Binding ErrorMessage, Converter={x:StaticResource StringNotEmptyConverter}}"/>
+
+                <Button Text="Enviar denuncia formal"
+                        Command="{Binding EnviarCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={x:StaticResource InvertBoolConverter}}"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        TextColor="White" FontAttributes="Bold"
+                        CornerRadius="12" HeightRequest="54" Margin="0,4,0,8"/>
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource BrandPrimary}"
+                                   IsVisible="{Binding IsBusy}"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
