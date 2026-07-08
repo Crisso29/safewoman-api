@@ -36,10 +36,9 @@ public static class MauiProgram
 #elif DEBUG
     private const string ApiBaseUrl = "https://localhost:7273/api/";
 #else
-    // ↓ Reemplaza con tu URL ngrok o dominio de producción antes de publicar.
-    // Cuando la URL sea correcta, elimina la directiva #error de más abajo.
-    private const string ApiBaseUrl = "https://REEMPLAZAR_CON_URL_NGROK/api/";
-    #error La URL de la API en RELEASE aún es el placeholder. Reemplaza ApiBaseUrl en MauiProgram.cs con tu URL real y elimina esta directiva #error antes de publicar.
+    // Producción — API desplegada en Render.com con SSL válido.
+    // UptimeRobot pinguea cada 5 min para evitar el cold-start del plan Free.
+    private const string ApiBaseUrl = "https://safewoman-api.onrender.com/api/";
 #endif
 
     public static MauiApp CreateMauiApp()
