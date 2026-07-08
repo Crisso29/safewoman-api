@@ -20,9 +20,12 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
         // ── Persistencia ─────────────────────────────────────────────────────────
+        // PostgreSQL vía Npgsql. La migración desde SQL Server fue transparente:
+        // los tipos EF (int, string, decimal, DateTime, bool) tienen equivalencia
+        // directa; las Fluent API configurations son agnósticas del proveedor.
         services.AddDbContext<SafeWomanDbContext>(options =>
-            options.UseSqlServer(config.GetConnectionString("DefaultConnection"),
-                sql => sql.MigrationsAssembly(typeof(SafeWomanDbContext).Assembly.FullName)));
+            options.UseNpgsql(config.GetConnectionString("DefaultConnection"),
+                npg => npg.MigrationsAssembly(typeof(SafeWomanDbContext).Assembly.FullName)));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

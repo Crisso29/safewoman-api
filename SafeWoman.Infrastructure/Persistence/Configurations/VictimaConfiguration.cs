@@ -17,7 +17,7 @@ public class VictimaConfiguration : IEntityTypeConfiguration<Victima>
         builder.Property(v => v.PasswordHash).HasColumnName("password_hash").HasMaxLength(255).IsRequired();
         builder.Property(v => v.Verificada).HasColumnName("verificada").HasDefaultValue(false);
         builder.Property(v => v.Activa).HasColumnName("activa").HasDefaultValue(true);
-        builder.Property(v => v.FechaRegistro).HasColumnName("fecha_registro").HasDefaultValueSql("GETUTCDATE()");
+        builder.Property(v => v.FechaRegistro).HasColumnName("fecha_registro").HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
         builder.HasIndex(v => v.Dni).IsUnique().HasDatabaseName("UQ_VICTIMA_dni");
         builder.HasIndex(v => v.Telefono).IsUnique().HasDatabaseName("UQ_VICTIMA_telefono");

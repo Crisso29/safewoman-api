@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using SafeWoman.Domain.Exceptions;
 
 namespace SafeWoman.API.Middleware;
@@ -48,13 +48,20 @@ public class ExceptionMiddleware
             if (!context.Response.HasStarted)
                 context.Response.StatusCode = 499; // Client Closed Request
         }
-        catch (SqlException ex)
+        catch (PostgresException ex)
         {
             _logger.LogError(ex, "Error de base de datos");
 
-            var detail = ex.Number == 208
-                ? "Tabla no encontrada en la base de datos. Ejecuta 'dotnet ef database update' o reinicia la API para aplicar las migraciones."
-                : (_env.IsDevelopment() ? $"SQL Error {ex.Number}: {ex.Message}" : "Error de base de datos.");
+            // Códigos PostgreSQL comunes:
+            //   42P01 — undefined_table (equivalente a SQL Server 208)
+            //   28P01 — invalid_password
+            //   23505 — unique_violation
+            var detail = ex.SqlState switch
+            {
+                "42P01" => "Tabla no encontrada. Ejecuta 'dotnet ef database update' para aplicar las migraciones.",
+                "23505" => "Ya existe un registro con esos datos.",
+                _ => _env.IsDevelopment() ? $"Postgres {ex.SqlState}: {ex.Message}" : "Error de base de datos."
+            };
 
             await WriteProblemAsync(context, HttpStatusCode.InternalServerError,
                 "Error de base de datos", detail);

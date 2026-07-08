@@ -2,9 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SafeWoman.Infrastructure.Persistence;
 
 #nullable disable
@@ -12,7 +12,7 @@ using SafeWoman.Infrastructure.Persistence;
 namespace SafeWoman.Infrastructure.Migrations
 {
     [DbContext(typeof(SafeWomanDbContext))]
-    [Migration("20260605002518_InitialCreate")]
+    [Migration("20260708032050_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -21,51 +21,51 @@ namespace SafeWoman.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("SafeWoman.Domain.Entities.Administrador", b =>
                 {
                     b.Property<int>("IdAdmin")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_admin");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdAdmin"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdAdmin"));
 
                     b.Property<bool>("Activo")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("activo");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("email");
 
                     b.Property<DateTime>("FechaRegistro")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_registro")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("character varying(150)")
                         .HasColumnName("nombre");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("password_hash");
 
                     b.Property<DateTime?>("UltimoAcceso")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("ultimo_acceso");
 
                     b.HasKey("IdAdmin");
@@ -81,21 +81,21 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdAlerta")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_alerta");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdAlerta"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdAlerta"));
 
                     b.Property<string>("Estado")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("character varying(20)")
                         .HasDefaultValue("activa")
                         .HasColumnName("estado");
 
                     b.Property<int>("IdVictima")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_victima");
 
                     b.Property<decimal>("Latitud")
@@ -108,12 +108,12 @@ namespace SafeWoman.Infrastructure.Migrations
 
                     b.Property<DateTime>("TimestampActivacion")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp_activacion")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.Property<DateTime?>("TimestampCancelacion")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp_cancelacion");
 
                     b.HasKey("IdAlerta");
@@ -128,25 +128,25 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdContacto")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_contacto");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdContacto"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdContacto"));
 
                     b.Property<int>("IdVictima")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_victima");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("character varying(150)")
                         .HasColumnName("nombre");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
                         .HasMaxLength(9)
-                        .HasColumnType("nvarchar(9)")
+                        .HasColumnType("character varying(9)")
                         .HasColumnName("telefono");
 
                     b.HasKey("IdContacto");
@@ -160,20 +160,20 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdDenuncia")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_denuncia");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDenuncia"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdDenuncia"));
 
                     b.Property<bool>("DeclaracionJurada")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("declaracion_jurada");
 
                     b.Property<string>("Departamento")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("departamento");
 
                     b.Property<string>("Descripcion")
@@ -182,22 +182,22 @@ namespace SafeWoman.Infrastructure.Migrations
 
                     b.Property<string>("Distrito")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("distrito");
 
                     b.Property<string>("Estado")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("character varying(20)")
                         .HasDefaultValue("pendiente")
                         .HasColumnName("estado");
 
                     b.Property<DateTime>("FechaEnvio")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_envio")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.Property<DateOnly?>("FechaHecho")
                         .HasColumnType("date")
@@ -205,15 +205,15 @@ namespace SafeWoman.Infrastructure.Migrations
 
                     b.Property<string>("FotoDniRuta")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("foto_dni_ruta");
 
                     b.Property<TimeOnly?>("HoraHecho")
-                        .HasColumnType("time")
+                        .HasColumnType("time without time zone")
                         .HasColumnName("hora_hecho");
 
                     b.Property<int>("IdVictima")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_victima");
 
                     b.Property<decimal?>("LatHecho")
@@ -226,18 +226,18 @@ namespace SafeWoman.Infrastructure.Migrations
 
                     b.Property<string>("Provincia")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("provincia");
 
                     b.Property<string>("ReferenciaUbicacion")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("referencia_ubicacion");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("tipo");
 
                     b.HasKey("IdDenuncia");
@@ -255,14 +255,14 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdDenunciaAnonima")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_denuncia_anonima");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDenunciaAnonima"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdDenunciaAnonima"));
 
                     b.Property<string>("Departamento")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("departamento");
 
                     b.Property<string>("Descripcion")
@@ -271,33 +271,33 @@ namespace SafeWoman.Infrastructure.Migrations
 
                     b.Property<string>("Distrito")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("distrito");
 
                     b.Property<string>("Estado")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("character varying(20)")
                         .HasDefaultValue("pendiente")
                         .HasColumnName("estado");
 
                     b.Property<DateTime>("FechaEnvio")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_envio")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.Property<DateOnly?>("FechaHecho")
                         .HasColumnType("date")
                         .HasColumnName("fecha_hecho");
 
                     b.Property<TimeOnly?>("HoraHecho")
-                        .HasColumnType("time")
+                        .HasColumnType("time without time zone")
                         .HasColumnName("hora_hecho");
 
                     b.Property<int>("IdHuella")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_huella");
 
                     b.Property<decimal?>("LatHecho")
@@ -310,12 +310,12 @@ namespace SafeWoman.Infrastructure.Migrations
 
                     b.Property<string>("Provincia")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("provincia");
 
                     b.Property<string>("ReferenciaUbicacion")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("referencia_ubicacion");
 
                     b.HasKey("IdDenunciaAnonima");
@@ -333,23 +333,23 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdDenunciado")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_denunciado");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDenunciado"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdDenunciado"));
 
                     b.Property<int>("IdDenuncia")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_denuncia");
 
                     b.Property<string>("NombreAlias")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("character varying(200)")
                         .HasColumnName("nombre_alias");
 
                     b.Property<string>("RelacionVictima")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("relacion_victima");
 
                     b.HasKey("IdDenunciado");
@@ -364,23 +364,23 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdDenunciadoAn")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_denunciado_an");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDenunciadoAn"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdDenunciadoAn"));
 
                     b.Property<int>("IdDenunciaAnonima")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_denuncia_anonima");
 
                     b.Property<string>("NombreAlias")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("character varying(200)")
                         .HasColumnName("nombre_alias");
 
                     b.Property<string>("Relacion")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("character varying(50)")
                         .HasColumnName("relacion");
 
                     b.HasKey("IdDenunciadoAn");
@@ -395,31 +395,31 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdEvidencia")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_evidencia");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdEvidencia"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdEvidencia"));
 
                     b.Property<DateTime>("FechaSubida")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_subida")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.Property<int>("IdDenuncia")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_denuncia");
 
                     b.Property<string>("NombreArchivo")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("nombre_archivo");
 
                     b.Property<string>("RutaArchivo")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("ruta_archivo");
 
                     b.Property<long?>("TamanioBytes")
@@ -430,7 +430,7 @@ namespace SafeWoman.Infrastructure.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("character varying(50)")
                         .HasDefaultValue("imagen")
                         .HasColumnName("tipo_archivo");
 
@@ -445,31 +445,31 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdEvidenciaAn")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_evidencia_an");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdEvidenciaAn"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdEvidenciaAn"));
 
                     b.Property<DateTime>("FechaSubida")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_subida")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.Property<int>("IdDenunciaAnonima")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_denuncia_anonima");
 
                     b.Property<string>("NombreArchivo")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("nombre_archivo");
 
                     b.Property<string>("RutaArchivo")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("ruta_archivo");
 
                     b.Property<long?>("TamanioBytes")
@@ -480,7 +480,7 @@ namespace SafeWoman.Infrastructure.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("character varying(50)")
                         .HasDefaultValue("imagen")
                         .HasColumnName("tipo_archivo");
 
@@ -495,34 +495,34 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdHuella")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_huella");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdHuella"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdHuella"));
 
                     b.Property<bool>("Bloqueada")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("bloqueada");
 
                     b.Property<string>("DeviceFingerprint")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("device_fingerprint");
 
                     b.Property<DateTime>("FechaPrimerUso")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_primer_uso")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.Property<DateTime>("FechaUltimoUso")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_ultimo_uso")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.HasKey("IdHuella");
 
@@ -540,41 +540,41 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdLog")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_log");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdLog"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdLog"));
 
                     b.Property<string>("Accion")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("accion");
 
                     b.Property<string>("Descripcion")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("descripcion");
 
                     b.Property<string>("EntidadAfectada")
                         .IsRequired()
                         .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)")
+                        .HasColumnType("character varying(60)")
                         .HasColumnName("entidad_afectada");
 
                     b.Property<int?>("IdAdmin")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_admin");
 
                     b.Property<int?>("IdEntidadAfectada")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_entidad_afectada");
 
                     b.Property<DateTime>("Timestamp")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.HasKey("IdLog");
 
@@ -588,10 +588,10 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdOtp")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_otp");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdOtp"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdOtp"));
 
                     b.Property<string>("Codigo")
                         .IsRequired()
@@ -599,22 +599,22 @@ namespace SafeWoman.Infrastructure.Migrations
                         .HasColumnName("codigo");
 
                     b.Property<DateTime>("FechaExpiracion")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_expiracion");
 
                     b.Property<DateTime>("FechaGeneracion")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_generacion")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.Property<int>("IdVictima")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_victima");
 
                     b.Property<bool>("Usado")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("usado");
 
@@ -630,14 +630,14 @@ namespace SafeWoman.Infrastructure.Migrations
                 {
                     b.Property<int>("IdVictima")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_victima");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdVictima"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdVictima"));
 
                     b.Property<bool>("Activa")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("activa");
 
@@ -648,31 +648,31 @@ namespace SafeWoman.Infrastructure.Migrations
 
                     b.Property<DateTime>("FechaRegistro")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_registro")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
                     b.Property<string>("NombreCompleto")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("character varying(200)")
                         .HasColumnName("nombre_completo");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("password_hash");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
                         .HasMaxLength(9)
-                        .HasColumnType("nvarchar(9)")
+                        .HasColumnType("character varying(9)")
                         .HasColumnName("telefono");
 
                     b.Property<bool>("Verificada")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("verificada");
 

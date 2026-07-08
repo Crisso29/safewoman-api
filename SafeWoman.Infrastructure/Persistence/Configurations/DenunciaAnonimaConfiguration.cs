@@ -16,7 +16,7 @@ public class DenunciaAnonimaConfiguration : IEntityTypeConfiguration<DenunciaAno
         builder.Property(d => d.Estado).HasColumnName("estado")
                .HasConversion(e => e.ToString().ToLower(), s => Enum.Parse<EstadoDenuncia>(s, true))
                .HasMaxLength(20).HasDefaultValue(EstadoDenuncia.Pendiente);
-        builder.Property(d => d.FechaEnvio).HasColumnName("fecha_envio").HasDefaultValueSql("GETUTCDATE()");
+        builder.Property(d => d.FechaEnvio).HasColumnName("fecha_envio").HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
         builder.Property(d => d.Departamento).HasColumnName("departamento").HasMaxLength(100).IsRequired(false);
         builder.Property(d => d.Provincia).HasColumnName("provincia").HasMaxLength(100).IsRequired(false);
         builder.Property(d => d.Distrito).HasColumnName("distrito").HasMaxLength(100).IsRequired(false);

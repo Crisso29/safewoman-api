@@ -21,7 +21,7 @@ public class LogAuditoriaConfiguration : IEntityTypeConfiguration<LogAuditoria>
         builder.Property(l => l.EntidadAfectada).HasColumnName("entidad_afectada").HasMaxLength(60).IsRequired();
         builder.Property(l => l.IdEntidadAfectada).HasColumnName("id_entidad_afectada").IsRequired(false);
         builder.Property(l => l.Descripcion).HasColumnName("descripcion").HasMaxLength(500).IsRequired(false);
-        builder.Property(l => l.Timestamp).HasColumnName("timestamp").HasDefaultValueSql("GETUTCDATE()");
+        builder.Property(l => l.Timestamp).HasColumnName("timestamp").HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
         builder.HasOne(l => l.Administrador)
                .WithMany()

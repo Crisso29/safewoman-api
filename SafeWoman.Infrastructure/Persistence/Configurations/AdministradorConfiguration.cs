@@ -16,7 +16,7 @@ public class AdministradorConfiguration : IEntityTypeConfiguration<Administrador
         builder.Property(a => a.PasswordHash).HasColumnName("password_hash").HasMaxLength(255).IsRequired();
         builder.Property(a => a.Activo).HasColumnName("activo").HasDefaultValue(true);
         builder.Property(a => a.UltimoAcceso).HasColumnName("ultimo_acceso").IsRequired(false);
-        builder.Property(a => a.FechaRegistro).HasColumnName("fecha_registro").HasDefaultValueSql("GETUTCDATE()");
+        builder.Property(a => a.FechaRegistro).HasColumnName("fecha_registro").HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
 
         builder.HasIndex(a => a.Email).IsUnique().HasDatabaseName("UQ_ADMINISTRADOR_email");
     }

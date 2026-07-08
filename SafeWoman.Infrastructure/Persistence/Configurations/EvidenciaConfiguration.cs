@@ -19,6 +19,6 @@ public class EvidenciaConfiguration : IEntityTypeConfiguration<Evidencia>
                .HasConversion(t => t.ToString().ToLower(), s => Enum.Parse<TipoArchivo>(s, true))
                .HasMaxLength(50).HasDefaultValue(TipoArchivo.Imagen);
         builder.Property(e => e.TamanioBytes).HasColumnName("tamanio_bytes").IsRequired(false);
-        builder.Property(e => e.FechaSubida).HasColumnName("fecha_subida").HasDefaultValueSql("GETUTCDATE()");
+        builder.Property(e => e.FechaSubida).HasColumnName("fecha_subida").HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
     }
 }

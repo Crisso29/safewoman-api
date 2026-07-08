@@ -15,7 +15,7 @@ public class AlertaSosConfiguration : IEntityTypeConfiguration<AlertaSos>
         builder.Property(a => a.IdVictima).HasColumnName("id_victima").IsRequired();
         builder.Property(a => a.Latitud).HasColumnName("latitud").HasColumnType("DECIMAL(10,7)").IsRequired();
         builder.Property(a => a.Longitud).HasColumnName("longitud").HasColumnType("DECIMAL(10,7)").IsRequired();
-        builder.Property(a => a.TimestampActivacion).HasColumnName("timestamp_activacion").HasDefaultValueSql("GETUTCDATE()");
+        builder.Property(a => a.TimestampActivacion).HasColumnName("timestamp_activacion").HasDefaultValueSql("(NOW() AT TIME ZONE 'UTC')");
         builder.Property(a => a.TimestampCancelacion).HasColumnName("timestamp_cancelacion").IsRequired(false);
         builder.Property(a => a.Estado).HasColumnName("estado")
                .HasConversion(e => e.ToString().ToLower(), s => Enum.Parse<EstadoAlerta>(s, true))

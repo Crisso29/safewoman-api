@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,14 +16,14 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "ADMINISTRADOR",
                 columns: table => new
                 {
-                    id_admin = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    nombre = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    password_hash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    activo = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    ultimo_acceso = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    fecha_registro = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    id_admin = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    nombre = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    password_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    activo = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    ultimo_acceso = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    fecha_registro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')")
                 },
                 constraints: table =>
                 {
@@ -33,12 +34,12 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "HUELLA_DISPOSITIVO",
                 columns: table => new
                 {
-                    id_huella = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    device_fingerprint = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    bloqueada = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    fecha_primer_uso = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    fecha_ultimo_uso = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    id_huella = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    device_fingerprint = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    bloqueada = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    fecha_primer_uso = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')"),
+                    fecha_ultimo_uso = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')")
                 },
                 constraints: table =>
                 {
@@ -49,15 +50,15 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "VICTIMA",
                 columns: table => new
                 {
-                    id_victima = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    nombre_completo = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    id_victima = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    nombre_completo = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     dni = table.Column<string>(type: "CHAR(8)", nullable: false),
-                    telefono = table.Column<string>(type: "nvarchar(9)", maxLength: 9, nullable: false),
-                    password_hash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    verificada = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    activa = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    fecha_registro = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    telefono = table.Column<string>(type: "character varying(9)", maxLength: 9, nullable: false),
+                    password_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    verificada = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    activa = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    fecha_registro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')")
                 },
                 constraints: table =>
                 {
@@ -68,14 +69,14 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "LOG_AUDITORIA",
                 columns: table => new
                 {
-                    id_log = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_admin = table.Column<int>(type: "int", nullable: true),
-                    accion = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    entidad_afectada = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
-                    id_entidad_afectada = table.Column<int>(type: "int", nullable: true),
-                    descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    timestamp = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    id_log = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_admin = table.Column<int>(type: "integer", nullable: true),
+                    accion = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    entidad_afectada = table.Column<string>(type: "character varying(60)", maxLength: 60, nullable: false),
+                    id_entidad_afectada = table.Column<int>(type: "integer", nullable: true),
+                    descripcion = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')")
                 },
                 constraints: table =>
                 {
@@ -92,19 +93,19 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "DENUNCIA_ANONIMA",
                 columns: table => new
                 {
-                    id_denuncia_anonima = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_huella = table.Column<int>(type: "int", nullable: false),
-                    estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "pendiente"),
-                    fecha_envio = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    departamento = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    provincia = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    distrito = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    referencia_ubicacion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    lat_hecho = table.Column<decimal>(type: "DECIMAL(10,7)", nullable: true),
-                    lng_hecho = table.Column<decimal>(type: "DECIMAL(10,7)", nullable: true),
+                    id_denuncia_anonima = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_huella = table.Column<int>(type: "integer", nullable: false),
+                    estado = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "pendiente"),
+                    fecha_envio = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')"),
+                    departamento = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    provincia = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    distrito = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    referencia_ubicacion = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    lat_hecho = table.Column<decimal>(type: "numeric(10,7)", nullable: true),
+                    lng_hecho = table.Column<decimal>(type: "numeric(10,7)", nullable: true),
                     fecha_hecho = table.Column<DateOnly>(type: "date", nullable: true),
-                    hora_hecho = table.Column<TimeOnly>(type: "time", nullable: true),
+                    hora_hecho = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
                     descripcion = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -121,14 +122,14 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "ALERTA_SOS",
                 columns: table => new
                 {
-                    id_alerta = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_victima = table.Column<int>(type: "int", nullable: false),
-                    latitud = table.Column<decimal>(type: "DECIMAL(10,7)", nullable: false),
-                    longitud = table.Column<decimal>(type: "DECIMAL(10,7)", nullable: false),
-                    timestamp_activacion = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    timestamp_cancelacion = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "activa")
+                    id_alerta = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_victima = table.Column<int>(type: "integer", nullable: false),
+                    latitud = table.Column<decimal>(type: "numeric(10,7)", nullable: false),
+                    longitud = table.Column<decimal>(type: "numeric(10,7)", nullable: false),
+                    timestamp_activacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')"),
+                    timestamp_cancelacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    estado = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "activa")
                 },
                 constraints: table =>
                 {
@@ -144,11 +145,11 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "CONTACTO_EMERGENCIA",
                 columns: table => new
                 {
-                    id_contacto = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_victima = table.Column<int>(type: "int", nullable: false),
-                    nombre = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    telefono = table.Column<string>(type: "nvarchar(9)", maxLength: 9, nullable: false)
+                    id_contacto = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_victima = table.Column<int>(type: "integer", nullable: false),
+                    nombre = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    telefono = table.Column<string>(type: "character varying(9)", maxLength: 9, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -165,23 +166,23 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "DENUNCIA",
                 columns: table => new
                 {
-                    id_denuncia = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_victima = table.Column<int>(type: "int", nullable: false),
-                    tipo = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "pendiente"),
-                    fecha_envio = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    foto_dni_ruta = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    departamento = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    provincia = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    distrito = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    referencia_ubicacion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    lat_hecho = table.Column<decimal>(type: "DECIMAL(10,7)", nullable: true),
-                    lng_hecho = table.Column<decimal>(type: "DECIMAL(10,7)", nullable: true),
+                    id_denuncia = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_victima = table.Column<int>(type: "integer", nullable: false),
+                    tipo = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    estado = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "pendiente"),
+                    fecha_envio = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')"),
+                    foto_dni_ruta = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    departamento = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    provincia = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    distrito = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    referencia_ubicacion = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    lat_hecho = table.Column<decimal>(type: "numeric(10,7)", nullable: true),
+                    lng_hecho = table.Column<decimal>(type: "numeric(10,7)", nullable: true),
                     fecha_hecho = table.Column<DateOnly>(type: "date", nullable: true),
-                    hora_hecho = table.Column<TimeOnly>(type: "time", nullable: true),
+                    hora_hecho = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
                     descripcion = table.Column<string>(type: "TEXT", nullable: true),
-                    declaracion_jurada = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                    declaracion_jurada = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
@@ -197,13 +198,13 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "OTP_VERIFICACION",
                 columns: table => new
                 {
-                    id_otp = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_victima = table.Column<int>(type: "int", nullable: false),
+                    id_otp = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_victima = table.Column<int>(type: "integer", nullable: false),
                     codigo = table.Column<string>(type: "CHAR(6)", nullable: false),
-                    fecha_generacion = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    fecha_expiracion = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    usado = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                    fecha_generacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')"),
+                    fecha_expiracion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    usado = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
@@ -220,11 +221,11 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "DENUNCIADO_ANONIMA",
                 columns: table => new
                 {
-                    id_denunciado_an = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_denuncia_anonima = table.Column<int>(type: "int", nullable: false),
-                    nombre_alias = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    relacion = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                    id_denunciado_an = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_denuncia_anonima = table.Column<int>(type: "integer", nullable: false),
+                    nombre_alias = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    relacion = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -241,14 +242,14 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "EVIDENCIA_ANONIMA",
                 columns: table => new
                 {
-                    id_evidencia_an = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_denuncia_anonima = table.Column<int>(type: "int", nullable: false),
-                    nombre_archivo = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    ruta_archivo = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    tipo_archivo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "imagen"),
+                    id_evidencia_an = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_denuncia_anonima = table.Column<int>(type: "integer", nullable: false),
+                    nombre_archivo = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    ruta_archivo = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    tipo_archivo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "imagen"),
                     tamanio_bytes = table.Column<long>(type: "bigint", nullable: true),
-                    fecha_subida = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    fecha_subida = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')")
                 },
                 constraints: table =>
                 {
@@ -265,11 +266,11 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "DENUNCIADO",
                 columns: table => new
                 {
-                    id_denunciado = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_denuncia = table.Column<int>(type: "int", nullable: false),
-                    nombre_alias = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    relacion_victima = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                    id_denunciado = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_denuncia = table.Column<int>(type: "integer", nullable: false),
+                    nombre_alias = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    relacion_victima = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -286,14 +287,14 @@ namespace SafeWoman.Infrastructure.Migrations
                 name: "EVIDENCIA",
                 columns: table => new
                 {
-                    id_evidencia = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    id_denuncia = table.Column<int>(type: "int", nullable: false),
-                    nombre_archivo = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    ruta_archivo = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    tipo_archivo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "imagen"),
+                    id_evidencia = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    id_denuncia = table.Column<int>(type: "integer", nullable: false),
+                    nombre_archivo = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    ruta_archivo = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    tipo_archivo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "imagen"),
                     tamanio_bytes = table.Column<long>(type: "bigint", nullable: true),
-                    fecha_subida = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    fecha_subida = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "(NOW() AT TIME ZONE 'UTC')")
                 },
                 constraints: table =>
                 {
