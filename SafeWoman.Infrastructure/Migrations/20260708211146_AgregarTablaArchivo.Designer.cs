@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SafeWoman.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using SafeWoman.Infrastructure.Persistence;
 namespace SafeWoman.Infrastructure.Migrations
 {
     [DbContext(typeof(SafeWomanDbContext))]
-    partial class SafeWomanDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260708211146_AgregarTablaArchivo")]
+    partial class AgregarTablaArchivo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -29,6 +29,10 @@ public partial class HomeViewModel : ObservableObject
     /// <summary>Estado del RefreshView — enlazado a IsRefreshing en el XAML.</summary>
     [ObservableProperty] private bool _refrescandoDenuncias;
 
+    /// <summary>Error visible en la UI si la carga falló (401, red, etc.).</summary>
+    [ObservableProperty] private bool _errorDenuncias;
+    [ObservableProperty] private string _mensajeErrorDenuncias = string.Empty;
+
     public HomeViewModel(AuthStateService authState, ApiService api,
                          LocationService location, IAlarmService alarm,
                          DeviceFingerprintService device)
@@ -75,13 +79,16 @@ public partial class HomeViewModel : ObservableObject
             MisDenuncias.Clear();
             TieneDenuncias = false;
             SinDenuncias   = false;
+            ErrorDenuncias = false;
             return;
         }
 
         CargandoDenuncias = true;
+        ErrorDenuncias    = false;   // Reset del estado de error al reintentar
         try
         {
-            var items = new List<DenunciaResumenItem>();
+            var items       = new List<DenunciaResumenItem>();
+            var errores     = new List<string>();
 
             // 1. Formales — mediante JWT.
             var formales = await _api.ObtenerMisDenunciasAsync();
@@ -96,10 +103,12 @@ public partial class HomeViewModel : ObservableObject
                     Descripcion = d.Descripcion
                 }));
             }
+            else if (!string.IsNullOrEmpty(formales.Error))
+            {
+                errores.Add($"Formales: {formales.Error}");
+            }
 
             // 2. Anónimas — mediante device fingerprint.
-            // Se muestran junto a las formales porque son "denuncias del mismo dispositivo",
-            // y el usuario ya está autenticado (regla previa) → puede verlas todas.
             var fingerprint = _device.GetOrCreate();
             var anonimas = await _api.ObtenerMisDenunciasAnonimasAsync(fingerprint);
             if (anonimas.Success && anonimas.Data is not null)
@@ -113,14 +122,39 @@ public partial class HomeViewModel : ObservableObject
                     Descripcion = d.Descripcion
                 }));
             }
+            else if (!string.IsNullOrEmpty(anonimas.Error))
+            {
+                errores.Add($"Anónimas: {anonimas.Error}");
+            }
 
             // Ordenamos por fecha descendente (más reciente primero).
             MisDenuncias.Clear();
             foreach (var item in items.OrderByDescending(x => x.Fecha))
                 MisDenuncias.Add(item);
 
-            TieneDenuncias = MisDenuncias.Count > 0;
-            SinDenuncias   = !TieneDenuncias;
+            // Decisión de qué estado mostrar:
+            //  - Si tenemos items → mostrarlos (aunque una de las llamadas haya fallado).
+            //  - Si ambas llamadas fallaron (0 items + 2 errores) → mostrar error.
+            //  - Si ambas fueron OK pero no hay items → "sin denuncias".
+            if (MisDenuncias.Count > 0)
+            {
+                TieneDenuncias = true;
+                SinDenuncias   = false;
+                ErrorDenuncias = false;
+            }
+            else if (errores.Count == 2)
+            {
+                TieneDenuncias = false;
+                SinDenuncias   = false;
+                ErrorDenuncias = true;
+                MensajeErrorDenuncias = string.Join(" · ", errores);
+            }
+            else
+            {
+                TieneDenuncias = false;
+                SinDenuncias   = true;
+                ErrorDenuncias = false;
+            }
         }
         finally
         {

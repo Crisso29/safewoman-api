@@ -231,6 +231,46 @@
                                        FontSize="12"
                                        TextColor="{StaticResource TextMuted}"
                                        HorizontalOptions="Center" />
+                                <Button Text="Reintentar"
+                                        Command="{Binding RefrescarDenunciasCommand}"
+                                        BackgroundColor="{StaticResource BrandLight}"
+                                        TextColor="{StaticResource BrandPrimary}"
+                                        FontSize="12" FontAttributes="Bold"
+                                        CornerRadius="8" Padding="12,6"
+                                        HorizontalOptions="Center"
+                                        Margin="0,6,0,0" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Estado: error al cargar (401, sin red, etc.) -->
+                        <Border Grid.Row="1"
+                                IsVisible="{Binding ErrorDenuncias}"
+                                BackgroundColor="{StaticResource BgMain}"
+                                Stroke="#EF4444"
+                                StrokeShape="RoundRectangle 16"
+                                StrokeThickness="1"
+                                Padding="16">
+                            <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                <Label Text="⚠️"
+                                       FontSize="32"
+                                       HorizontalOptions="Center" />
+                                <Label Text="No pudimos cargar tus denuncias"
+                                       FontSize="13" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextMain}"
+                                       HorizontalOptions="Center" />
+                                <Label Text="{Binding MensajeErrorDenuncias}"
+                                       FontSize="11"
+                                       TextColor="{StaticResource TextMuted}"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center" />
+                                <Button Text="Reintentar"
+                                        Command="{Binding RefrescarDenunciasCommand}"
+                                        BackgroundColor="{StaticResource BrandPrimary}"
+                                        TextColor="White"
+                                        FontSize="12" FontAttributes="Bold"
+                                        CornerRadius="8" Padding="14,6"
+                                        HorizontalOptions="Center"
+                                        Margin="0,6,0,0" />
                             </VerticalStackLayout>
                         </Border>
 

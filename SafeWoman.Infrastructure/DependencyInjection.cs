@@ -74,7 +74,10 @@ public static class DependencyInjection
         services.AddSingleton<IReverseGeocoder, NominatimReverseGeocoder>();
 
         // ── Almacenamiento y tiempo real ──────────────────────────────────────────
-        services.AddScoped<IFileStorage,  LocalFileStorage>();
+        // DbFileStorage guarda los archivos en PostgreSQL como bytea → sobrevive
+        // los redeploys de Render Free (filesystem efímero). LocalFileStorage
+        // queda como fallback histórico si algún día se migra a disco persistente.
+        services.AddScoped<IFileStorage,  DbFileStorage>();
         services.AddScoped<ISosNotifier,  SignalRSosNotifier>();
 
         services.AddSignalR();

@@ -20,6 +20,7 @@ public class SafeWomanDbContext : DbContext
     public DbSet<DenunciadoAnonima>   DenunciadosAnonimos  => Set<DenunciadoAnonima>();
     public DbSet<EvidenciaAnonima>    EvidenciasAnonimas   => Set<EvidenciaAnonima>();
     public DbSet<LogAuditoria>        LogsAuditoria        => Set<LogAuditoria>();
+    public DbSet<ArchivoAlmacenado>   Archivos             => Set<ArchivoAlmacenado>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
