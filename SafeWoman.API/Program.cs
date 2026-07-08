@@ -203,13 +203,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// UseHttpsRedirection en Development ROMPE el flujo cuando el cliente MAUI usa HTTP:
-// el server responde 307 → HTTPS, HttpClient sigue el redirect pero descarta el
-// header Authorization por seguridad (defensa contra fuga de token). Resultado:
-// el server ve "sin token" y responde 401. En Development trabajamos con HTTP
-// directo (LAN interna). En producción HTTPS lo maneja el reverse proxy.
-if (!app.Environment.IsDevelopment())
-    app.UseHttpsRedirection();
+// UseHttpsRedirection NO se activa nunca dentro del contenedor:
+//   - En Development trabajamos con HTTP directo (LAN interna).
+//   - En Production (Render, Azure App Service, etc.), el reverse proxy termina
+//     el SSL en el edge y pasa HTTP al contenedor. Si activáramos redirection
+//     aquí, el server intentaría redirigir 307 → HTTPS y HttpClient descartaría
+//     el header Authorization en el redirect (defensa contra fuga de token).
+// La política HTTPS-only ya la aplica Render en su edge.
 
 app.UseStaticFiles();
 app.UseRateLimiter();
