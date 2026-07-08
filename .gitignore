@@ -52,3 +52,15 @@ Desktop.ini
 *.tmp
 *.bak
 *.swp
+
+## Testing — reportes y resultados generados localmente
+CoverageReport/
+TestResults/
+coverage.cobertura.xml
+coverage.opencover.xml
+*.trx
+lcov.info
+
+## Notas locales con credenciales / secrets
+PasswordAdmin.txt
+NotasPrivadas.txt
