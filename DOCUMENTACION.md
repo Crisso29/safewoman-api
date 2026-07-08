@@ -28,6 +28,7 @@
 16. [Distribución de la app](#16-distribución-de-la-app)
 17. [Conclusiones](#17-conclusiones)
 18. [Glosario técnico](#18-glosario-técnico)
+19. [Estructura de carpetas y Git](#19-estructura-de-carpetas-y-git)
 
 ---
 
@@ -1424,6 +1425,299 @@ El APK está firmado con **debug key** para facilitar la distribución académic
 | **AAA Pattern** | Estructura de tests: Arrange (preparar), Act (ejecutar), Assert (verificar). |
 | **Mock** | Objeto falso que imita una dependencia para tests aislados. |
 | **Test Fixture** | Contexto compartido entre múltiples tests (ej. contenedor Docker). |
+
+---
+
+## 19. Estructura de carpetas y Git
+
+Esta sección explica **qué contiene cada carpeta del proyecto**, **qué archivos se suben al repositorio y cuáles no**, y **por qué** — información crítica para colaborar en equipo sin filtrar secretos ni contaminar el repo.
+
+### 19.1 Vista de alto nivel
+
+```
+SafeWoman/                          ← Carpeta raíz de la solución
+│
+├── 📁 SafeWoman.Domain/            → Capa 1 · Núcleo del negocio
+├── 📁 SafeWoman.Application/       → Capa 2 · Casos de uso
+├── 📁 SafeWoman.Infrastructure/    → Capa 3 · Implementaciones
+├── 📁 SafeWoman.API/               → Capa 4 · Web API + Panel Admin
+├── 📁 SafeWoman/                   → App móvil MAUI (Android)
+├── 📁 Tests/                       → 3 proyectos de tests
+├── 📁 .github/                     → Workflows CI/CD (GitHub Actions)
+├── 📄 Dockerfile                   → Imagen productiva para Render
+├── 📄 SafeWoman.sln                → Solución Visual Studio
+├── 📄 global.json                  → SDK .NET pinneado (8.0.422)
+├── 📄 Directory.Build.props        → Propiedades comunes a todos los proyectos
+├── 📄 README.md                    → Portada del proyecto
+├── 📄 DOCUMENTACION.md             → Este documento
+├── 📄 DEPLOY.md                    → Guía de despliegue
+└── 📄 .gitignore                   → Qué NO se sube a Git
+```
+
+### 19.2 Contenido detallado de cada carpeta
+
+#### 🎯 `SafeWoman.Domain/` — Núcleo del negocio
+
+**Propósito**: Contiene las reglas de negocio puras. **No depende de nada** — ni de EF Core, ni de HTTP, ni de frameworks. Es la capa más estable y reutilizable.
+
+| Subcarpeta | Contenido | Ejemplos |
+|---|---|---|
+| `Entities/` | Clases de dominio con lógica | `Victima.cs`, `Denuncia.cs`, `AlertaSos.cs` |
+| `Enums/` | Enumeraciones del dominio | `TipoDenuncia`, `EstadoAlerta` |
+| `Exceptions/` | Excepciones propias | `DomainException.cs` |
+| `Interfaces/` | Contratos base | `IRepository<T>`, `IUnitOfWork` |
+
+**Regla clave**: si algún día migras de PostgreSQL a MongoDB, o de ASP.NET Core a Node.js, esta carpeta **no cambia**.
+
+#### ⚙️ `SafeWoman.Application/` — Casos de uso
+
+**Propósito**: Orquesta las operaciones del sistema. Depende solo de `Domain`. Aquí viven los **casos de uso** que la app puede realizar.
+
+| Subcarpeta | Contenido |
+|---|---|
+| `Services/` | `AuthService`, `AlertaSosService`, `DenunciaService`, ... |
+| `DTOs/` | Objetos de transferencia (`RegistroRequest`, `AuthResponse`, ...) |
+| `Interfaces/` | Contratos que Infrastructure implementa (`IPasswordHasher`, `IOtpSender`, ...) |
+| `Validators/` | Validadores FluentValidation |
+| `DependencyInjection.cs` | Registro de servicios de esta capa |
+
+**Regla clave**: si necesitas un servicio externo (Twilio, JWT, storage), Application **define la interfaz** y Infrastructure la **implementa**.
+
+#### 🔌 `SafeWoman.Infrastructure/` — Implementaciones concretas
+
+**Propósito**: Aquí viven las conexiones con el mundo real: base de datos, APIs externas, sistema de archivos.
+
+| Subcarpeta | Contenido |
+|---|---|
+| `Persistence/` | `SafeWomanDbContext`, repositorios EF, configuraciones de entidades |
+| `Persistence/Migrations/` | Migraciones EF Core (generadas por CLI) |
+| `Services/Security/` | `BcryptPasswordHasher`, `JwtTokenService`, `OtpCodeGenerator` |
+| `Services/Sms/` | `TwilioSmsSender`, `ConsoleSmsSender` |
+| `Services/Geocoding/` | `NominatimReverseGeocoder` |
+| `Services/Storage/` | `LocalFileStorage` |
+| `Services/Realtime/` | `SignalRSosNotifier`, `SosHub` |
+| `Services/Admin/` | `AdminService` |
+| `DependencyInjection.cs` | Registro de servicios de infraestructura |
+
+**Regla clave**: es la única capa que puede tener paquetes NuGet como `Microsoft.EntityFrameworkCore.Npgsql`, `Twilio`, `BCrypt.Net-Next`.
+
+#### 🌐 `SafeWoman.API/` — Punto de entrada web
+
+**Propósito**: Expone HTTP endpoints REST (móvil), MVC (panel Admin) y SignalR (tiempo real).
+
+| Subcarpeta | Contenido |
+|---|---|
+| `Controllers/` | Endpoints REST para la app móvil |
+| `Areas/Admin/` | Panel administrativo MVC (Controllers + Views + Models) |
+| `Middleware/` | `ExceptionMiddleware` |
+| `Infrastructure/` | `DbSeeder` (crea admin inicial) |
+| `Program.cs` | Bootstrap ASP.NET Core: DI, middlewares, auth, rate limiting |
+| `appsettings.json` | Config pública (logging, etc.) |
+| `appsettings.Development.json` | 🔒 Config local con secretos (NO se sube) |
+
+#### 📱 `SafeWoman/` — App móvil MAUI
+
+**Propósito**: La aplicación Android para las víctimas.
+
+| Subcarpeta | Contenido |
+|---|---|
+| `Views/` | Páginas XAML (Home, Registro, Login, Perfil, ...) |
+| `ViewModels/` | Lógica de presentación siguiendo MVVM |
+| `Services/` | `ApiService`, `AuthStateService`, `LocationService`, ... |
+| `Platforms/Android/` | Código específico Android (permisos, WebView, ...) |
+| `Resources/` | Imágenes, fuentes, estilos, colores |
+| `MauiProgram.cs` | Bootstrap MAUI — incluye la URL de la API (DEV vs Release) |
+| `AppShell.xaml` | Navegación entre páginas |
+
+#### 🧪 `Tests/` — Pirámide de testing
+
+**Propósito**: Suite de 187 tests distribuidos en 3 proyectos.
+
+| Proyecto | Contenido | Cantidad |
+|---|---|---|
+| `SafeWoman.UnitTests/` | Tests unitarios (Domain, Services, Security, Validators) | 158 |
+| `SafeWoman.IntegrationTests/` | Persistencia real con Testcontainers | 11 |
+| `SafeWoman.ApiTests/` | Pipeline HTTP completo con WebApplicationFactory | 18 |
+
+Detalles completos en la [sección 15](#15-pruebas-y-verificación).
+
+#### 🚀 `.github/workflows/` — CI/CD
+
+**Propósito**: Automatización de tests en cada push/PR.
+
+| Archivo | Función |
+|---|---|
+| `ci.yml` | Pipeline de 5 jobs: build → unit → integration → api → coverage |
+
+Se ejecuta en cada push a `main`/`qa` y en cada PR hacia `main`.
+
+### 19.3 Archivos raíz — para qué sirve cada uno
+
+| Archivo | ¿Se sube a Git? | Función |
+|---|---|---|
+| `.gitignore` | ✅ Sí | Lista de patrones que Git ignora |
+| `.dockerignore` | ✅ Sí | Lista de patrones que Docker excluye de la imagen |
+| `Dockerfile` | ✅ Sí | Receta para construir la imagen productiva |
+| `SafeWoman.sln` | ✅ Sí | Solución Visual Studio |
+| `global.json` | ✅ Sí | SDK .NET pinneado (garantiza builds reproducibles) |
+| `Directory.Build.props` | ✅ Sí | Propiedades MSBuild comunes |
+| `README.md` | ✅ Sí | Portada del proyecto |
+| `DOCUMENTACION.md` | ✅ Sí | Documentación técnica |
+| `DEPLOY.md` | ✅ Sí | Guía de despliegue |
+| `SafeWoman.slnLaunch.user` | ❌ No | Perfil de lanzamiento personal de VS |
+| `PasswordAdmin.txt` | ❌ No | Notas privadas con credenciales |
+
+### 19.4 ¿Qué NO se sube a Git? — Contenido del `.gitignore`
+
+Estos archivos y carpetas **nunca** deben llegar al repositorio:
+
+#### 🔨 Artefactos de compilación (regenerables)
+
+```
+bin/           ← Salida binaria de cada proyecto (regenerable)
+obj/           ← Archivos intermedios de MSBuild (regenerable)
+*.pdb          ← Símbolos de debug
+*.dll, *.exe   ← Binarios compilados
+Debug/, Release/, publish/
+```
+
+**Por qué NO**: Cambian con cada compilación → contaminarían el repo con miles de bytes cambiantes. Cualquiera puede regenerarlos con `dotnet build`.
+
+#### 🔐 Secretos y credenciales
+
+```
+appsettings.Development.json    ← Passwords, tokens Twilio, JWT keys
+appsettings.Testing.json         ← Config para tests locales
+appsettings.qa.json              ← Config para QA
+secrets.json                     ← User secrets de .NET
+*.pfx                            ← Certificados con clave privada
+*.keystore                       ← Keystores de firma Android
+PasswordAdmin.txt                ← Notas privadas
+```
+
+**Por qué NO**: Si estos archivos llegan al repositorio público, cualquiera puede leer las contraseñas y comprometer el sistema.
+
+#### 📱 APK y binarios Android
+
+```
+*.apk        ← Aplicación instalable
+*.aab        ← Android App Bundle
+*.keystore   ← Clave de firma
+```
+
+**Por qué NO**: Pesan mucho (35 MB+), se regeneran fácil, y las keystores son sensibles.
+
+#### 🗺️ Configuración específica del entorno
+
+```
+SafeWoman/Platforms/Android/Resources/values/strings.xml   ← Google Maps API key
+SafeWoman/bin/                                              ← Salida MAUI muy pesada
+SafeWoman/obj/
+```
+
+**Por qué NO**: Contiene API keys personales de Google. Cada desarrollador usa su propia key.
+
+#### 🧪 Resultados de tests (regenerables)
+
+```
+CoverageReport/     ← HTML del reporte de cobertura
+TestResults/        ← Archivos .trx y coverage.cobertura.xml
+coverage.*.xml
+lcov.info
+*.trx
+```
+
+**Por qué NO**: Se regeneran corriendo `dotnet test --collect:"XPlat Code Coverage"`.
+
+#### 💻 Archivos de IDE personal
+
+```
+.vs/                          ← Cache de Visual Studio
+.idea/                        ← Cache de JetBrains Rider
+*.user                        ← Preferencias personales del usuario
+SafeWoman.slnLaunch.user      ← Perfiles de lanzamiento personal
+```
+
+**Por qué NO**: Cada desarrollador tiene su propia configuración de IDE.
+
+#### 🖥️ Basura del sistema operativo
+
+```
+Thumbs.db          ← Windows
+Desktop.ini        ← Windows
+.DS_Store          ← macOS
+```
+
+### 19.5 Cómo verificar qué se subirá antes de un commit
+
+Comando útil para inspeccionar:
+
+```bash
+# Ver qué archivos "staged" van al próximo commit
+git status --short
+
+# Ver el diff completo de lo que se va a subir
+git diff --cached
+
+# Ver el tamaño de los archivos staged
+git ls-files -s --cached | awk '{print $4}' | xargs -I {} du -h {}
+```
+
+Si algún archivo secreto se coló:
+
+```bash
+# Sacarlo del staging (pero mantenerlo en disco)
+git rm --cached appsettings.Development.json
+
+# Añadir el patrón al .gitignore si no está
+echo "appsettings.Development.json" >> .gitignore
+
+# Commit
+git commit -m "Remove leaked secrets from repo"
+git push
+```
+
+### 19.6 Cómo replicar el proyecto en otra máquina
+
+Un nuevo colaborador solo necesita:
+
+```bash
+# 1. Clonar
+git clone https://github.com/Crisso29/safewoman-api.git
+cd safewoman-api
+
+# 2. Restaurar paquetes NuGet
+dotnet restore
+
+# 3. Copiar el template de secretos y llenarlo
+cp SafeWoman.API/appsettings.json SafeWoman.API/appsettings.Development.json
+# Edita con tus credenciales de BD, JWT, Twilio
+
+# 4. (Opcional) Aplicar migraciones a tu BD local
+dotnet ef database update -p SafeWoman.Infrastructure -s SafeWoman.API
+
+# 5. Ejecutar
+dotnet run --project SafeWoman.API
+```
+
+Todo lo demás (bin, obj, TestResults, coverage) se genera automáticamente.
+
+### 19.7 Tabla resumen — sube o no sube
+
+| Categoría | Ejemplo | ¿Al repositorio? | ¿Al contenedor Docker? |
+|---|---|---|---|
+| Código fuente `.cs`, `.xaml` | `AuthService.cs` | ✅ Sí | ✅ Sí (backend) |
+| Archivos de proyecto `.csproj`, `.sln` | `SafeWoman.API.csproj` | ✅ Sí | ✅ Sí (backend) |
+| Documentación `.md` | `README.md` | ✅ Sí | ❌ No |
+| Config pública | `appsettings.json` | ✅ Sí | ✅ Sí |
+| Config con secretos | `appsettings.Development.json` | ❌ No | ❌ No |
+| Compilados | `bin/`, `obj/` | ❌ No | ⚠️ Se generan dentro |
+| Tests | `Tests/` | ✅ Sí | ❌ No (Docker copia solo backend) |
+| CI/CD | `.github/workflows/ci.yml` | ✅ Sí | ❌ No |
+| APK Android | `*.apk` | ❌ No | ❌ No |
+| Reportes de cobertura | `CoverageReport/` | ❌ No | ❌ No |
+
+**Regla mnemotécnica**: si el archivo se puede **regenerar automáticamente** o contiene **información sensible**, no va al repositorio. Todo lo demás sí.
 
 ---
 
