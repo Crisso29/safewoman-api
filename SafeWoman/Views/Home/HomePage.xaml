@@ -49,8 +49,13 @@
             </Grid>
         </Grid>
 
-        <!-- Body -->
-        <ScrollView Grid.Row="1">
+        <!-- Body — envuelto en RefreshView para pull-to-refresh en la Home.
+             Refresca el widget "Mis denuncias" cuando el usuario tira hacia abajo. -->
+        <RefreshView Grid.Row="1"
+                     IsRefreshing="{Binding RefrescandoDenuncias}"
+                     Command="{Binding RefrescarDenunciasCommand}"
+                     RefreshColor="{StaticResource BrandPrimary}">
+        <ScrollView>
             <VerticalStackLayout Spacing="0">
 
                 <!-- SOS Zone -->
@@ -298,6 +303,7 @@
 
             </VerticalStackLayout>
         </ScrollView>
+        </RefreshView>
 
         <!-- Bottom nav — borde superior en lugar de Shadow (Shadow en Grid cuesta mucho en Android) -->
         <BoxView Grid.Row="2" HeightRequest="1"

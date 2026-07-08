@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using SafeWoman.Models;
 
 namespace SafeWoman.Services;
@@ -20,7 +21,15 @@ public class ApiService
 
     private readonly HttpClient _http;
     private readonly AuthStateService _authState;
-    private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
+    // El backend serializa enums como strings camelCase ("pendiente", "enProceso",
+    // "atendida", "archivada") gracias al JsonStringEnumConverter en Program.cs.
+    // El móvil debe deserializarlos con el mismo converter — sin él, el enum queda
+    // siempre en 0 (Pendiente) porque System.Text.Json no sabe parsear "atendida" → enum.
+    private static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+    };
 
     public ApiService(HttpClient http, AuthStateService authState)
     {

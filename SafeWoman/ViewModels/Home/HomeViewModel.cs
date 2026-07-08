@@ -26,6 +26,9 @@ public partial class HomeViewModel : ObservableObject
     [ObservableProperty] private bool _tieneDenuncias;
     [ObservableProperty] private bool _sinDenuncias;
 
+    /// <summary>Estado del RefreshView — enlazado a IsRefreshing en el XAML.</summary>
+    [ObservableProperty] private bool _refrescandoDenuncias;
+
     public HomeViewModel(AuthStateService authState, ApiService api,
                          LocationService location, IAlarmService alarm,
                          DeviceFingerprintService device)
@@ -122,6 +125,23 @@ public partial class HomeViewModel : ObservableObject
         finally
         {
             CargandoDenuncias = false;
+        }
+    }
+
+    /// <summary>
+    /// Command para el pull-to-refresh del RefreshView.
+    /// Reutiliza la misma lógica de carga; solo apaga el spinner al terminar.
+    /// </summary>
+    [RelayCommand]
+    private async Task RefrescarDenunciasAsync()
+    {
+        try
+        {
+            await CargarMisDenunciasAsync();
+        }
+        finally
+        {
+            RefrescandoDenuncias = false;
         }
     }
 
