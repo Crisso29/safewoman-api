@@ -153,12 +153,15 @@ builder.Services.AddCors(options =>
 });
 
 // ── Rate Limiting ─────────────────────────────────────────────────────────────
-// Máximo 10 peticiones por minuto por IP en los endpoints de autenticación
+// Máximo N peticiones por minuto por IP en los endpoints de autenticación.
+// El límite es configurable: 10 en producción para frenar fuerza bruta, muy alto
+// en Testing para que los tests de integración no choquen con el limitador.
+var authRateLimit = builder.Configuration.GetValue<int?>("RateLimit:AuthPerMinute") ?? 10;
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("auth", limiter =>
     {
-        limiter.PermitLimit           = 10;
+        limiter.PermitLimit           = authRateLimit;
         limiter.Window                = TimeSpan.FromMinutes(1);
         limiter.QueueProcessingOrder  = QueueProcessingOrder.OldestFirst;
         limiter.QueueLimit            = 0;
@@ -263,3 +266,8 @@ app.MapGet("/", () => Results.Text(
 await DbSeeder.SeedAsync(app.Services);
 
 app.Run();
+
+// Expone la clase Program como pública para que WebApplicationFactory<Program>
+// del proyecto de tests de API pueda instanciarla. Sin esto, WebApplicationFactory
+// no puede resolver el tipo del ensamblado y falla al arrancar el TestServer.
+public partial class Program { }
