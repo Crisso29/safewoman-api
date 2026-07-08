@@ -67,6 +67,19 @@ public class ApiService
     public Task<ApiResponse<object>> EnviarDenunciaAnonimaAsync(MultipartFormDataContent form) =>
         SendMultipartAsync<object>("denuncias/anonima", form);
 
+    // ═══ DENUNCIAS — seguimiento (mis denuncias) ═══════════════════════════════
+
+    /// <summary>Mis denuncias formales (requiere JWT — el server usa el idVictima del token).</summary>
+    public Task<ApiResponse<IReadOnlyList<DenunciaDto>>> ObtenerMisDenunciasAsync() =>
+        SendAsync<IReadOnlyList<DenunciaDto>>(HttpMethod.Get, "denuncias");
+
+    /// <summary>Mis denuncias anónimas (sin JWT — se filtran por device fingerprint).</summary>
+    public Task<ApiResponse<IReadOnlyList<DenunciaAnonimaResumenDto>>> ObtenerMisDenunciasAnonimasAsync(
+        string deviceFingerprint) =>
+        SendAsync<IReadOnlyList<DenunciaAnonimaResumenDto>>(
+            HttpMethod.Get,
+            $"denuncias/anonima/mis?deviceFingerprint={Uri.EscapeDataString(deviceFingerprint)}");
+
     // ═══ CORE ═══════════════════════════════════════════════════════════════════
 
     private HttpRequestMessage BuildRequest(HttpMethod method, string path, HttpContent? body = null)

@@ -177,6 +177,123 @@
                         </VerticalStackLayout>
                     </Border>
 
+                    <!-- Mis denuncias — solo para víctimas autenticadas. -->
+                    <!-- Se auto-oculta si el usuario no tiene sesión (TieneDenuncias y SinDenuncias son false). -->
+                    <Grid RowDefinitions="Auto,Auto,Auto" Margin="0,24,0,0">
+
+                        <!-- Cabecera con contador de notificación -->
+                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                            <Label Grid.Column="0"
+                                   Text="MIS DENUNCIAS"
+                                   FontSize="12" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextMuted}"
+                                   VerticalOptions="Center" />
+                            <Border Grid.Column="1"
+                                    IsVisible="{Binding TieneDenuncias}"
+                                    BackgroundColor="{StaticResource BrandPrimary}"
+                                    StrokeShape="RoundRectangle 10"
+                                    Stroke="Transparent"
+                                    Padding="8,2"
+                                    VerticalOptions="Center">
+                                <Label Text="{Binding MisDenuncias.Count}"
+                                       FontSize="11" FontAttributes="Bold" TextColor="White" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Estado: cargando -->
+                        <ActivityIndicator Grid.Row="1"
+                                           IsRunning="{Binding CargandoDenuncias}"
+                                           IsVisible="{Binding CargandoDenuncias}"
+                                           Color="{StaticResource BrandPrimary}"
+                                           HorizontalOptions="Center" />
+
+                        <!-- Estado: sin denuncias (usuario logueado, aún no reportó nada) -->
+                        <Border Grid.Row="1"
+                                IsVisible="{Binding SinDenuncias}"
+                                BackgroundColor="{StaticResource BgMain}"
+                                Stroke="{StaticResource Border}"
+                                StrokeShape="RoundRectangle 16"
+                                Padding="16">
+                            <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                <Label Text="📋"
+                                       FontSize="32"
+                                       HorizontalOptions="Center" />
+                                <Label Text="Aún no tienes denuncias"
+                                       FontSize="13" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextMain}"
+                                       HorizontalOptions="Center" />
+                                <Label Text="Cuando envíes una, verás su estado aquí."
+                                       FontSize="12"
+                                       TextColor="{StaticResource TextMuted}"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Estado: con denuncias — lista tipo notificación -->
+                        <VerticalStackLayout Grid.Row="1"
+                                             IsVisible="{Binding TieneDenuncias}"
+                                             Spacing="10"
+                                             BindableLayout.ItemsSource="{Binding MisDenuncias}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BackgroundColor="{StaticResource BgMain}"
+                                            Stroke="{StaticResource Border}"
+                                            StrokeShape="RoundRectangle 16"
+                                            Padding="14,12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+
+                                            <!-- Ícono de estado (círculo con emoji) -->
+                                            <Border Grid.Column="0"
+                                                    WidthRequest="40" HeightRequest="40"
+                                                    StrokeShape="RoundRectangle 20"
+                                                    BackgroundColor="{Binding EstadoColor}"
+                                                    Stroke="Transparent"
+                                                    VerticalOptions="Center">
+                                                <Label Text="{Binding EstadoIcono}"
+                                                       FontSize="18"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center" />
+                                            </Border>
+
+                                            <!-- Texto: tipo + descripción + fecha -->
+                                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                <HorizontalStackLayout Spacing="6">
+                                                    <Label Text="{Binding TipoLabel, StringFormat='Denuncia {0}'}"
+                                                           FontSize="13" FontAttributes="Bold"
+                                                           TextColor="{StaticResource TextMain}" />
+                                                    <Label Text="•"
+                                                           FontSize="13"
+                                                           TextColor="{StaticResource TextMuted}" />
+                                                    <Label Text="{Binding FechaCorta}"
+                                                           FontSize="12"
+                                                           TextColor="{StaticResource TextMuted}"
+                                                           VerticalOptions="Center" />
+                                                </HorizontalStackLayout>
+                                                <Label Text="{Binding ResumenTexto}"
+                                                       FontSize="12"
+                                                       TextColor="{StaticResource TextMuted}"
+                                                       LineBreakMode="TailTruncation"
+                                                       MaxLines="2" />
+                                            </VerticalStackLayout>
+
+                                            <!-- Badge de estado en la esquina -->
+                                            <Border Grid.Column="2"
+                                                    BackgroundColor="{Binding EstadoColor}"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    Stroke="Transparent"
+                                                    Padding="8,4"
+                                                    VerticalOptions="Center">
+                                                <Label Text="{Binding EstadoLabel}"
+                                                       FontSize="10" FontAttributes="Bold"
+                                                       TextColor="White" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Grid>
+
                 </VerticalStackLayout>
 
             </VerticalStackLayout>

@@ -48,4 +48,22 @@ public class DenunciaAnonimaController : ApiControllerBase
         var id = await _service.EnviarAsync(req, evidencias, ct);
         return Ok(new { idDenunciaAnonima = id, mensaje = "Denuncia anónima enviada correctamente." });
     }
+
+    /// <summary>
+    /// Devuelve las denuncias anónimas asociadas al deviceFingerprint provisto.
+    /// Endpoint PÚBLICO (sin JWT) porque las denuncias anónimas no vinculan
+    /// identidad, pero solo se listan si conoces el fingerprint exacto del
+    /// dispositivo que las envió. Cualquier device puede consultar solo lo suyo.
+    /// </summary>
+    [HttpGet("mis")]
+    public async Task<IActionResult> ListarPorDevice(
+        [FromQuery] string deviceFingerprint,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(deviceFingerprint))
+            return BadRequest(new { error = "deviceFingerprint es obligatorio." });
+
+        var denuncias = await _service.ListarPorDeviceAsync(deviceFingerprint, ct);
+        return Ok(denuncias);
+    }
 }

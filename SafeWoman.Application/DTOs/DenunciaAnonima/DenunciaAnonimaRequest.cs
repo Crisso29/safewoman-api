@@ -16,3 +16,15 @@ public record DenunciaAnonimaRequest(
     TimeOnly? HoraHecho,
     string? Descripcion
 );
+
+/// <summary>
+/// Vista resumida de una denuncia anónima para el seguimiento en la app.
+/// NO incluye datos sensibles (denunciado, ubicación exacta) para reducir
+/// riesgo si el teléfono es comprometido — solo estado, fecha y descripción corta.
+/// </summary>
+public record DenunciaAnonimaResumenDto(
+    int IdDenunciaAnonima,
+    EstadoDenuncia Estado,
+    DateTime FechaEnvio,
+    string? Descripcion
+);

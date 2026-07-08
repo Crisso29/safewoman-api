@@ -84,6 +84,30 @@ public class DenunciaAnonimaService
         }
     }
 
+    /// <summary>
+    /// Devuelve las denuncias anónimas asociadas a una huella de dispositivo.
+    /// Permite que la app muestre "mis denuncias anónimas" sin exponer la
+    /// identidad de la víctima (solo se vincula por device fingerprint).
+    /// </summary>
+    public async Task<IReadOnlyList<DenunciaAnonimaResumenDto>> ListarPorDeviceAsync(
+        string deviceFingerprint, CancellationToken ct = default)
+    {
+        // Si no existe huella con ese fingerprint, no devolvemos nada — no hay
+        // razón para revelar si el device fue visto antes o no.
+        var huellas = await _huellaRepo.FindAsync(h => h.DeviceFingerprint == deviceFingerprint, ct);
+        var huella = huellas.FirstOrDefault();
+        if (huella is null)
+            return Array.Empty<DenunciaAnonimaResumenDto>();
+
+        var denuncias = await _denunciaRepo.FindAsync(d => d.IdHuella == huella.IdHuella, ct);
+
+        return denuncias
+            .OrderByDescending(d => d.FechaEnvio)
+            .Select(d => new DenunciaAnonimaResumenDto(
+                d.IdDenunciaAnonima, d.Estado, d.FechaEnvio, d.Descripcion))
+            .ToList();
+    }
+
     private async Task<HuellaDispositivo> ObtenerOCrearHuellaAsync(string fingerprint, CancellationToken ct)
     {
         var huellas = await _huellaRepo.FindAsync(h => h.DeviceFingerprint == fingerprint, ct);

@@ -1,28 +1,40 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SafeWoman.Models;
 using SafeWoman.Services;
 
 namespace SafeWoman.ViewModels.Home;
 
 public partial class HomeViewModel : ObservableObject
 {
-    private readonly AuthStateService _authState;
-    private readonly ApiService       _api;
-    private readonly LocationService  _location;
-    private readonly IAlarmService    _alarm;
+    private readonly AuthStateService         _authState;
+    private readonly ApiService               _api;
+    private readonly LocationService          _location;
+    private readonly IAlarmService            _alarm;
+    private readonly DeviceFingerprintService _device;
 
     [ObservableProperty] private string _nombreVictima    = string.Empty;
     [ObservableProperty] private string _iniciales         = string.Empty;
     [ObservableProperty] private int    _cantidadContactos;
     [ObservableProperty] private bool   _isBusy;
 
+    // ── Seguimiento de denuncias ─────────────────────────────────────────────
+    public ObservableCollection<DenunciaResumenItem> MisDenuncias { get; } = [];
+
+    [ObservableProperty] private bool _cargandoDenuncias;
+    [ObservableProperty] private bool _tieneDenuncias;
+    [ObservableProperty] private bool _sinDenuncias;
+
     public HomeViewModel(AuthStateService authState, ApiService api,
-                         LocationService location, IAlarmService alarm)
+                         LocationService location, IAlarmService alarm,
+                         DeviceFingerprintService device)
     {
         _authState = authState;
         _api       = api;
         _location  = location;
         _alarm     = alarm;
+        _device    = device;
     }
 
     public void CargarDatos()
@@ -41,6 +53,75 @@ public partial class HomeViewModel : ObservableObject
         {
             CantidadContactos = result.Data.Count;
             _authState.ContactosCacheInvalidado = false;
+        }
+    }
+
+    /// <summary>
+    /// Carga las denuncias del usuario para mostrar el estado en la Home.
+    /// Combina formales (por JWT) y anónimas (por device fingerprint) en una
+    /// sola lista ordenada por fecha descendente.
+    ///
+    /// Solo víctimas AUTENTICADAS ven esta sección — es una decisión de diseño
+    /// para no exponer denuncias anónimas a alguien que agarre un teléfono ajeno.
+    /// </summary>
+    public async Task CargarMisDenunciasAsync()
+    {
+        // Regla de negocio: solo víctimas autenticadas pueden ver el estado.
+        if (string.IsNullOrEmpty(_authState.CachedToken))
+        {
+            MisDenuncias.Clear();
+            TieneDenuncias = false;
+            SinDenuncias   = false;
+            return;
+        }
+
+        CargandoDenuncias = true;
+        try
+        {
+            var items = new List<DenunciaResumenItem>();
+
+            // 1. Formales — mediante JWT.
+            var formales = await _api.ObtenerMisDenunciasAsync();
+            if (formales.Success && formales.Data is not null)
+            {
+                items.AddRange(formales.Data.Select(d => new DenunciaResumenItem
+                {
+                    Id          = d.IdDenuncia,
+                    EsAnonima   = false,
+                    Estado      = d.Estado,
+                    Fecha       = d.FechaEnvio,
+                    Descripcion = d.Descripcion
+                }));
+            }
+
+            // 2. Anónimas — mediante device fingerprint.
+            // Se muestran junto a las formales porque son "denuncias del mismo dispositivo",
+            // y el usuario ya está autenticado (regla previa) → puede verlas todas.
+            var fingerprint = _device.GetOrCreate();
+            var anonimas = await _api.ObtenerMisDenunciasAnonimasAsync(fingerprint);
+            if (anonimas.Success && anonimas.Data is not null)
+            {
+                items.AddRange(anonimas.Data.Select(d => new DenunciaResumenItem
+                {
+                    Id          = d.IdDenunciaAnonima,
+                    EsAnonima   = true,
+                    Estado      = d.Estado,
+                    Fecha       = d.FechaEnvio,
+                    Descripcion = d.Descripcion
+                }));
+            }
+
+            // Ordenamos por fecha descendente (más reciente primero).
+            MisDenuncias.Clear();
+            foreach (var item in items.OrderByDescending(x => x.Fecha))
+                MisDenuncias.Add(item);
+
+            TieneDenuncias = MisDenuncias.Count > 0;
+            SinDenuncias   = !TieneDenuncias;
+        }
+        finally
+        {
+            CargandoDenuncias = false;
         }
     }
 
