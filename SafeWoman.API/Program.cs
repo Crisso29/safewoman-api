@@ -20,10 +20,12 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddCookie("AdminCookies", opt =>
     {
-        opt.LoginPath         = "/Admin/Auth/Login";
-        opt.AccessDeniedPath  = "/Admin/Auth/Denegado";
+        opt.LoginPath         = "/panel-safewoman/Auth/Login";
+        opt.AccessDeniedPath  = "/panel-safewoman/Auth/Denegado";
         opt.Cookie.Name       = "SafeWoman.Admin";
         opt.Cookie.HttpOnly   = true;
+        opt.Cookie.SameSite   = SameSiteMode.Lax;
+        opt.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         opt.ExpireTimeSpan    = TimeSpan.FromHours(8);
         opt.SlidingExpiration = true;
     })
@@ -197,14 +199,66 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
-// Swagger habilitado siempre — útil para la defensa académica y para verificar
-// que la API expone todos los endpoints en producción.
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+// ── Cabeceras de seguridad ────────────────────────────────────────────────────
+// Defensa en profundidad estándar OWASP. Ninguna cabecera cambia la funcionalidad,
+// pero endurecen la superficie frente a ataques de red y de navegador.
+app.Use(async (ctx, next) =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "SafeWoman API v1");
-    c.DocumentTitle = "SafeWoman API — Documentación";
+    var h = ctx.Response.Headers;
+    h["X-Content-Type-Options"]  = "nosniff";                                // bloquea MIME-sniffing
+    h["X-Frame-Options"]         = "DENY";                                   // bloquea clickjacking
+    h["Referrer-Policy"]         = "strict-origin-when-cross-origin";        // no filtrar URLs a terceros
+    h["Permissions-Policy"]      = "geolocation=(), microphone=(), camera=()"; // el panel no necesita sensores
+    // HSTS obliga al navegador a usar solo HTTPS. Se aplica únicamente cuando la
+    // conexión ya es HTTPS (evita romper pruebas locales por HTTP).
+    if (ctx.Request.IsHttps)
+        h["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
+    await next();
 });
+
+// ── Swagger protegido con Basic Auth ──────────────────────────────────────────
+// El catálogo de endpoints es información sensible para un atacante. Lo dejamos
+// disponible para la defensa académica pero pedimos credenciales antes de servir
+// tanto el HTML del UI como el JSON del schema.
+app.UseWhen(
+    ctx => ctx.Request.Path.StartsWithSegments("/swagger"),
+    swaggerApp =>
+    {
+        swaggerApp.Use(async (ctx, next) =>
+        {
+            var user = builder.Configuration["Swagger:User"];
+            var pass = builder.Configuration["Swagger:Password"];
+
+            // Si no hay credenciales configuradas, bloquea por defecto —
+            // "fail closed" para no exponer Swagger por olvido en producción.
+            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
+            {
+                ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+                return;
+            }
+
+            var auth = ctx.Request.Headers.Authorization.ToString();
+            if (auth.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+            {
+                var raw = Encoding.UTF8.GetString(Convert.FromBase64String(auth[6..]));
+                var parts = raw.Split(':', 2);
+                if (parts.Length == 2 && parts[0] == user && parts[1] == pass)
+                {
+                    await next();
+                    return;
+                }
+            }
+
+            ctx.Response.Headers.WWWAuthenticate = "Basic realm=\"SafeWoman API — Documentación\"";
+            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        });
+        swaggerApp.UseSwagger();
+        swaggerApp.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "SafeWoman API v1");
+            c.DocumentTitle = "SafeWoman API — Documentación";
+        });
+    });
 
 // UseHttpsRedirection NO se activa nunca dentro del contenedor:
 //   - En Development trabajamos con HTTP directo (LAN interna).
@@ -221,15 +275,22 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // ── Rutas MVC para el panel Admin (ANTES de MapControllers) ──────────────────
-app.MapControllerRoute(
-    name: "Admin",
-    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+// El area interna se sigue llamando "Admin" (los controllers viven en Areas/Admin),
+// pero la URL pública es /panel-safewoman/... para no delatar la existencia de un
+// panel administrativo a scanners automáticos.
+app.MapAreaControllerRoute(
+    name:      "PanelSafeWoman",
+    areaName:  "Admin",
+    pattern:   "panel-safewoman/{controller=Dashboard}/{action=Index}/{id?}");
 
 app.MapControllers();
 app.MapHub<SosHub>("/hubs/sos");
 
-// Redirect raíz → panel admin
-app.MapGet("/", ctx => { ctx.Response.Redirect("/Admin/Auth/Login"); return Task.CompletedTask; });
+// La raíz no revela la existencia del panel admin — solo devuelve un mensaje
+// neutro. Cualquiera que quiera entrar al panel debe conocer la ruta exacta.
+app.MapGet("/", () => Results.Text(
+    "SafeWoman API — servicio en línea.",
+    contentType: "text/plain; charset=utf-8"));
 
 // ── Seed del primer administrador ────────────────────────────────────────────
 await DbSeeder.SeedAsync(app.Services);

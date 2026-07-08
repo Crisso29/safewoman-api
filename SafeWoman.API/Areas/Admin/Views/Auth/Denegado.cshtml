@@ -10,7 +10,7 @@
     <div class="text-center">
         <h1 class="display-4">403</h1>
         <p class="lead">Acceso denegado. No tiene permisos para esta sección.</p>
-        <a href="/Admin/Auth/Login" class="btn btn-primary">Ir al login</a>
+        <a href="@Url.Action("Login", "Auth", new { area = "Admin" })" class="btn btn-primary">Ir al login</a>
     </div>
 </body>
 </html>

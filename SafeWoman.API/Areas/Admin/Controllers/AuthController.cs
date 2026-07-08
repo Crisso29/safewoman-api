@@ -60,7 +60,12 @@ public class AuthController : Controller
             admin.IdAdmin, AccionAuditoria.LoginAdmin,
             "ADMINISTRADOR", admin.IdAdmin, $"Login: {admin.Email}", ct);
 
-        return Redirect(returnUrl ?? "/Admin/Dashboard");
+        // Nunca hardcodear rutas: si returnUrl es local válido lo respetamos, si
+        // no, el helper genera la URL correcta desde la tabla de rutas (así, si
+        // cambia el path base del panel, no hay que tocar el controller).
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            return Redirect(returnUrl);
+        return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
     }
 
     [HttpGet]
