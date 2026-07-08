@@ -216,54 +216,10 @@ app.Use(async (ctx, next) =>
     await next();
 });
 
-// ── Swagger protegido con Basic Auth ──────────────────────────────────────────
-// El catálogo de endpoints es información sensible para un atacante. Lo dejamos
-// disponible para la defensa académica pero pedimos credenciales antes de servir
-// tanto el HTML del UI como el JSON del schema.
-//
-// Implementación: middleware inline (sin UseWhen) que intercepta /swagger, valida
-// Basic Auth y termina la respuesta explícitamente si no autoriza — así ningún
-// middleware downstream vuelve a tocar la respuesta.
-app.Use(async (ctx, next) =>
-{
-    if (!ctx.Request.Path.StartsWithSegments("/swagger"))
-    {
-        await next();
-        return;
-    }
-
-    var user = builder.Configuration["Swagger:User"];
-    var pass = builder.Configuration["Swagger:Password"];
-
-    // Fail-closed: si no hay credenciales configuradas, /swagger no existe.
-    if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
-    {
-        ctx.Response.StatusCode = StatusCodes.Status404NotFound;
-        await ctx.Response.WriteAsync("Not Found");
-        return;
-    }
-
-    var auth = ctx.Request.Headers.Authorization.ToString();
-    if (auth.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
-    {
-        try
-        {
-            var raw   = Encoding.UTF8.GetString(Convert.FromBase64String(auth[6..]));
-            var parts = raw.Split(':', 2);
-            if (parts.Length == 2 && parts[0] == user && parts[1] == pass)
-            {
-                await next();
-                return;
-            }
-        }
-        catch (FormatException) { /* header Base64 malformado → trata como no auth */ }
-    }
-
-    ctx.Response.Headers.WWWAuthenticate = "Basic realm=\"SafeWoman API — Documentación\"";
-    ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-    await ctx.Response.WriteAsync("Authentication required");
-});
-
+// ── Swagger UI ────────────────────────────────────────────────────────────────
+// Disponible en /swagger. La documentación técnica es útil para inspecciones
+// académicas y para el equipo de desarrollo. En un despliegue de producción con
+// datos sensibles reales se puede envolver con Basic Auth o restringir por IP.
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
