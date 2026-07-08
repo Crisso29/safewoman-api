@@ -1,0 +1,243 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# SafeWoman — Pipeline CI/CD
+#
+# Estrategia: pirámide de testing paralelizada.
+#   • unit-tests        → rápido (~30s), sin infraestructura
+#   • integration-tests → medio (~2min), PostgreSQL service en el runner
+#   • api-tests         → medio (~2min), pipeline HTTP completo + PostgreSQL
+#
+# Los 3 jobs corren EN PARALELO tras un build compartido.
+# Si cualquiera falla, el pipeline se marca como failed y bloquea el merge.
+#
+# Triggers:
+#   - Push a main o qa    → corre CI
+#   - Pull Request a main → corre CI (bloquea merge si rojo)
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: CI
+
+on:
+  push:
+    branches: [main, qa]
+  pull_request:
+    branches: [main]
+
+# Solo una ejecución por rama a la vez — cancela corridas viejas si hay push nuevo
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # 1️⃣ BUILD — compila todo y guarda el resultado como artifact
+  # ───────────────────────────────────────────────────────────────────────────
+  build:
+    name: 🔨 Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      # Restauramos y compilamos solo los proyectos del backend (los de MAUI
+      # necesitan Android SDK que no está en el runner ubuntu-latest).
+      - name: Restore backend + tests
+        run: |
+          dotnet restore SafeWoman.API/SafeWoman.API.csproj
+          dotnet restore Tests/SafeWoman.UnitTests/SafeWoman.UnitTests.csproj
+          dotnet restore Tests/SafeWoman.IntegrationTests/SafeWoman.IntegrationTests.csproj
+          dotnet restore Tests/SafeWoman.ApiTests/SafeWoman.ApiTests.csproj
+
+      - name: Build backend
+        run: dotnet build SafeWoman.API/SafeWoman.API.csproj --no-restore -c Release
+
+      - name: Build test projects
+        run: |
+          dotnet build Tests/SafeWoman.UnitTests/SafeWoman.UnitTests.csproj --no-restore -c Release
+          dotnet build Tests/SafeWoman.IntegrationTests/SafeWoman.IntegrationTests.csproj --no-restore -c Release
+          dotnet build Tests/SafeWoman.ApiTests/SafeWoman.ApiTests.csproj --no-restore -c Release
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 2️⃣ UNIT TESTS — sin infraestructura, muy rápido
+  # ───────────────────────────────────────────────────────────────────────────
+  unit-tests:
+    name: 🧪 Unit tests (158)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
+
+      - name: Run unit tests with coverage
+        run: |
+          dotnet test Tests/SafeWoman.UnitTests/SafeWoman.UnitTests.csproj \
+            --configuration Release \
+            --logger "trx;LogFileName=unit-tests.trx" \
+            --results-directory TestResults \
+            --collect:"XPlat Code Coverage" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      - name: Upload unit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: TestResults/**/*
+          retention-days: 7
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 3️⃣ INTEGRATION TESTS — Testcontainers levanta su propio Postgres
+  # ───────────────────────────────────────────────────────────────────────────
+  # NOTA: Testcontainers usa el Docker daemon del runner (ya está instalado
+  # en ubuntu-latest). No hace falta declarar un `services:` — Testcontainers
+  # crea y destruye el contenedor por sí solo.
+  integration-tests:
+    name: 🐘 Integration tests (11)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
+
+      - name: Verify Docker is available
+        run: docker version
+
+      - name: Run integration tests
+        run: |
+          dotnet test Tests/SafeWoman.IntegrationTests/SafeWoman.IntegrationTests.csproj \
+            --configuration Release \
+            --logger "trx;LogFileName=integration-tests.trx" \
+            --results-directory TestResults
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: TestResults/**/*
+          retention-days: 7
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 4️⃣ API TESTS — pipeline HTTP end-to-end + Postgres
+  # ───────────────────────────────────────────────────────────────────────────
+  api-tests:
+    name: 🌐 API tests (18)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
+
+      - name: Verify Docker is available
+        run: docker version
+
+      - name: Run API tests
+        run: |
+          dotnet test Tests/SafeWoman.ApiTests/SafeWoman.ApiTests.csproj \
+            --configuration Release \
+            --logger "trx;LogFileName=api-tests.trx" \
+            --results-directory TestResults
+
+      - name: Upload API test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results
+          path: TestResults/**/*
+          retention-days: 7
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 5️⃣ COVERAGE REPORT — se ejecuta después de unit-tests
+  #    Publica el HTML como artifact descargable + resumen en el PR
+  # ───────────────────────────────────────────────────────────────────────────
+  coverage:
+    name: 📊 Coverage report
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download unit test results
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-test-results
+          path: TestResults
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate HTML coverage report
+        run: |
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"CoverageReport" \
+            -reporttypes:"Html;MarkdownSummaryGithub" \
+            -assemblyfilters:"+SafeWoman.Domain;+SafeWoman.Application;+SafeWoman.Infrastructure;+SafeWoman.API" \
+            -classfilters:"-*.DTOs.*;-*DependencyInjection;-*Migrations*;-*Configurations*;-*Program;-*SosHub;-*Areas.Admin*;-*Controllers.*Controller;-*Middleware.*;-*DbSeeder;-*SafeWomanDbContext;-*Repository*;-*UnitOfWork;-*TwilioSmsSender;-*ConsoleSmsSender;-*NominatimReverseGeocoder;-*SignalRSosNotifier;-*LocalFileStorage;-*AdminService"
+
+      - name: Publish coverage HTML as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: CoverageReport/
+          retention-days: 30
+
+      - name: Post coverage summary in job output
+        run: cat CoverageReport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
