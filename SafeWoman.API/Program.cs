@@ -197,11 +197,14 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
-if (app.Environment.IsDevelopment())
+// Swagger habilitado siempre — útil para la defensa académica y para verificar
+// que la API expone todos los endpoints en producción.
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "SafeWoman API v1");
+    c.DocumentTitle = "SafeWoman API — Documentación";
+});
 
 // UseHttpsRedirection NO se activa nunca dentro del contenedor:
 //   - En Development trabajamos con HTTP directo (LAN interna).
