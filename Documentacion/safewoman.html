@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeWoman</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --wine: #8B1A3A;
+    --wine-dark: #6B0F2A;
+    --red: #E53935;
+    --white: #ffffff;
+    --bg: #F4F4F2;
+    --card: #ffffff;
+    --border: #E0DDD8;
+    --text: #1A1A1A;
+    --muted: #888880;
+    --green: #1D9E75;
+    --green-bg: #E1F5EE;
+    --green-text: #0F6E56;
+    --orange-bg: #FAECE7;
+    --orange-text: #D85A30;
+    --blue-bg: #E6F1FB;
+    --blue-text: #185FA5;
+    --yellow-bg: #FFF8E1;
+    --yellow-border: #FFE082;
+    --yellow-text: #4E342E;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #ECEAE5;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  /* PHONE FRAME */
+  .phone {
+    width: 375px;
+    background: var(--card);
+    border-radius: 40px;
+    border: 2px solid #ccc;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    position: relative;
+  }
+
+  .status-bar {
+    background: var(--wine);
+    padding: 10px 20px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .status-bar span { color: #fff; font-size: 12px; font-weight: 500; }
+
+  /* SCREENS */
+  .screen { display: none; opacity: 0; }
+  .screen.active { display: block; animation: fadeIn .25s ease forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ─── WELCOME ─── */
+  .welcome-bg {
+    background: linear-gradient(160deg, var(--wine) 0%, #B02050 50%, var(--wine-dark) 100%);
+    min-height: 680px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 48px 32px 40px;
+    position: relative; overflow: hidden;
+  }
+  .welcome-bg::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 240px; height: 240px; border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+    animation: floatA 7s ease-in-out infinite;
+  }
+  .welcome-bg::after {
+    content: '';
+    position: absolute; bottom: -50px; left: -50px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    animation: floatB 9s ease-in-out infinite;
+  }
+  @keyframes floatA { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-18px, 14px) scale(1.06); } }
+  @keyframes floatB { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(12px, -10px) scale(1.08); } }
+  .logo-circle {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 22px; font-size: 44px;
+    animation: logoPulse 3s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(255,255,255,0.25);
+  }
+  @keyframes logoPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.25); }
+    50%      { box-shadow: 0 0 0 14px rgba(255,255,255,0); }
+  }
+  .welcome-title { color: #fff; font-size: 32px; font-weight: 600; letter-spacing: 1px; margin-bottom: 8px; }
+  .welcome-sub { color: rgba(255,255,255,0.7); font-size: 14px; text-align: center; margin-bottom: 52px; line-height: 1.6; }
+  .btn-white {
+    width: 100%; padding: 15px;
+    background: linear-gradient(155deg, #ffffff 0%, #fce9ee 100%); color: var(--wine);
+    border: none; border-radius: 14px;
+    font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity .15s, transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+  .btn-white:hover { opacity: .95; transform: translateY(-2px); box-shadow: 0 7px 20px rgba(0,0,0,0.16); }
+  .btn-white:active { transform: translateY(0); }
+  .btn-outline {
+    width: 100%; padding: 15px;
+    background: transparent; color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    border-radius: 14px; font-size: 15px; font-weight: 500; font-family: inherit;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .15s, transform .15s;
+  }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+  .btn-outline:active { transform: translateY(0); }
+  .welcome-badge {
+    margin-top: 32px; padding: 7px 16px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px; color: rgba(255,255,255,0.6);
+    font-size: 12px; display: flex; align-items: center; gap: 6px;
+    position: relative; overflow: hidden;
+  }
+  .welcome-badge::after {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    animation: shimmer 3.5s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0% { left: -100%; } 100% { left: 200%; } }
+
+  /* ─── REGISTER ─── */
+  .reg-top {
+    background: linear-gradient(135deg, var(--wine) 0%, #A02040 100%);
+    padding: 18px 20px 16px;
+  }
+  .reg-top h2 { color: #fff; font-size: 17px; font-weight: 600; }
+  .reg-top p { color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 3px; }
+  .reg-progress { height: 3px; background: rgba(255,255,255,0.2); }
+  .reg-progress-fill { height: 100%; width: 33%; background: #fff; animation: progressLoad .6s ease-out; }
+  @keyframes progressLoad { from { width: 0; } to { width: 33%; } }
+  .reg-body { padding: 22px 20px; background: var(--white); }
+
+  .field-block { margin-bottom: 18px; }
+  .field-label {
+    display: block; font-size: 11px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .field-label .req { color: var(--red); }
+  .field-input {
+    width: 100%; padding: 11px 13px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; color: var(--text); font-family: inherit;
+    background: var(--white); outline: none;
+    transition: border-color .15s;
+  }
+  .field-input:focus { border-color: var(--wine); }
+  .field-input::placeholder { color: #bbb; font-size: 13px; }
+
+  .sms-info {
+    background: var(--blue-bg); border: 1px solid #B5D4F4;
+    border-radius: 8px; padding: 11px 13px;
+    display: flex; gap: 9px; align-items: flex-start; margin-bottom: 22px;
+  }
+  .sms-info-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .sms-info p { font-size: 12px; color: #0C447C; line-height: 1.5; }
+
+  .btn-wine {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--wine), var(--wine-dark)); color: #fff;
+    border: none; border-radius: 8px;
+    font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity .15s, transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 14px rgba(139,26,58,0.3);
+  }
+  .btn-wine:hover { opacity: .92; transform: translateY(-2px); box-shadow: 0 7px 20px rgba(139,26,58,0.4); }
+  .btn-wine:active { transform: translateY(0); }
+  .back-link {
+    text-align: center; margin-top: 14px;
+    font-size: 13px; color: var(--muted); cursor: pointer; background: none; border: none; font-family: inherit;
+  }
+
+  /* ─── HOME ─── */
+  .home-header {
+    background: linear-gradient(135deg, var(--wine) 0%, #A02040 100%);
+    padding: 14px 18px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .home-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 600;
+  }
+  .home-header h3 { color: #fff; font-size: 15px; font-weight: 600; }
+  .home-header p { color: rgba(255,255,255,0.7); font-size: 11px; }
+  .home-header-right { font-size: 22px; cursor: pointer; }
+
+  .sos-zone {
+    background: #fff; padding: 28px 20px 20px;
+    display: flex; flex-direction: column; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .sos-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+    color: var(--muted); margin-bottom: 20px;
+  }
+  .sos-btn {
+    width: 190px; height: 190px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 35%, #EF5350, #C62828);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .12s, box-shadow .12s;
+    box-shadow: 0 8px 28px rgba(229,57,53,0.45), 0 0 0 0 rgba(229,57,53,0.35);
+    animation: sosPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes sosPulse {
+    0%,100% { box-shadow: 0 8px 28px rgba(229,57,53,0.45), 0 0 0 0   rgba(229,57,53,0.35); }
+    60%     { box-shadow: 0 8px 28px rgba(229,57,53,0.3),  0 0 0 22px rgba(229,57,53,0);   }
+  }
+  .sos-btn:active { transform: scale(0.93); animation: none; box-shadow: 0 4px 14px rgba(229,57,53,0.6); }
+  .sos-btn span {
+    font-size: 58px; font-weight: 700; color: #fff;
+    letter-spacing: 4px; font-family: inherit;
+  }
+  .sos-hint { font-size: 11px; color: #aaa; margin-top: 14px; }
+
+  .home-body { background: var(--bg); padding: 18px; }
+  .section-title {
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 11px;
+  }
+  .action-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .action-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 15px 13px; cursor: pointer;
+    display: flex; flex-direction: column; gap: 9px;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+  }
+  .action-card:hover {
+    border-color: var(--wine);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(139,26,58,0.12);
+  }
+  .action-card:active { transform: translateY(-1px); }
+  .action-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .action-icon.formal { background: var(--orange-bg); }
+  .action-icon.anon { background: var(--green-bg); }
+  .action-card h4 { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .action-card p { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  .status-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 13px 15px;
+    display: flex; align-items: center; gap: 11px;
+  }
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .status-card p { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .status-card p strong { color: var(--text); }
+
+  .nav-tabs {
+    display: flex; background: var(--card);
+    border-top: 1px solid var(--border); padding: 4px 0 10px;
+  }
+  .nav-tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 7px 0; cursor: pointer; border: none; background: transparent;
+    font-family: inherit; position: relative; transition: opacity .15s;
+  }
+  .nav-tab:hover { opacity: .75; }
+  .nav-tab-icon { font-size: 20px; color: #ccc; transition: color .2s, transform .2s; }
+  .nav-tab-label { font-size: 10px; color: #ccc; transition: color .2s; }
+  .nav-tab.active .nav-tab-icon { color: var(--wine); transform: translateY(-1px); }
+  .nav-tab.active .nav-tab-label { color: var(--wine); font-weight: 600; }
+  .nav-tab.active::after {
+    content: '';
+    position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%; background: var(--wine);
+  }
+
+  /* ─── SOS ACTIVO ─── */
+  .sos-active {
+    background: #C62828; min-height: 680px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 48px 26px;
+  }
+  .sos-ring {
+    width: 170px; height: 170px; border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 32px;
+    animation: ring-pulse 1.6s infinite;
+  }
+  @keyframes ring-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+    70%  { box-shadow: 0 0 0 24px rgba(255,255,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  }
+  .sos-ring-inner {
+    width: 118px; height: 118px; border-radius: 50%;
+    background: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .sos-ring-inner span:first-child { font-size: 36px; font-weight: 700; color: #C62828; letter-spacing: 2px; }
+  .sos-ring-inner span:last-child { font-size: 10px; color: #a00; letter-spacing: 1px; }
+  .sos-active-title { color: #fff; font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .sos-active-sub { color: rgba(255,255,255,0.75); font-size: 13px; text-align: center; margin-bottom: 30px; line-height: 1.6; }
+  .sos-steps { width: 100%; display: flex; flex-direction: column; gap: 9px; margin-bottom: 30px; }
+  .sos-step {
+    background: rgba(255,255,255,0.12); border-radius: 10px;
+    padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .sos-step-icon { font-size: 18px; }
+  .sos-step span { font-size: 13px; color: rgba(255,255,255,0.92); }
+  .btn-cancel {
+    padding: 12px 32px; background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.4); border-radius: 9px;
+    color: rgba(255,255,255,0.75); font-size: 14px; font-family: inherit; cursor: pointer;
+  }
+
+  /* ─── FORMULARIOS — estilo ministerio ─── */
+  .form-topbar {
+    background: linear-gradient(135deg, var(--wine) 0%, #A02040 100%);
+    padding: 13px 16px;
+    display: flex; align-items: center; gap: 11px;
+  }
+  .topbar-back {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff;
+  }
+  .topbar-info h3 { color: #fff; font-size: 14px; font-weight: 600; }
+  .topbar-info p { color: rgba(255,255,255,0.7); font-size: 11px; }
+  .topbar-badge {
+    margin-left: auto; padding: 4px 11px;
+    border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .topbar-badge.formal { background: #FFCDD2; color: #B71C1C; }
+  .topbar-badge.anon   { background: #C8E6C9; color: #1B5E20; }
+
+  .form-scroll { overflow-y: auto; max-height: 600px; }
+  .form-section {
+    background: var(--card);
+    border-bottom: 6px solid var(--bg);
+    padding: 16px 18px;
+  }
+  .form-section-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--wine);
+    padding-bottom: 9px; border-bottom: 2px solid #FFCDD2;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .form-section-title::before {
+    content: attr(data-step);
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--wine); color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; letter-spacing: 0;
+  }
+  .mf-group { margin-bottom: 13px; }
+  .mf-label { display: block; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .mf-label .req { color: var(--red); margin-left: 2px; }
+  .mf-hint { font-size: 11px; color: var(--muted); margin-bottom: 5px; line-height: 1.5; }
+  .mf-input {
+    width: 100%; padding: 10px 11px;
+    border: 1.5px solid var(--border); border-radius: 6px;
+    font-size: 13px; color: var(--text); font-family: inherit;
+    background: var(--white); outline: none;
+    transition: border-color .15s;
+  }
+  .mf-input:focus { border-color: var(--wine); }
+  .mf-input::placeholder { color: #bbb; font-size: 12px; }
+  textarea.mf-input { resize: none; height: 80px; line-height: 1.5; }
+  .mf-select {
+    width: 100%; padding: 10px 11px;
+    border: 1.5px solid var(--border); border-radius: 6px;
+    font-size: 13px; color: var(--text); font-family: inherit;
+    background: var(--white); outline: none;
+  }
+  .mf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .map-box {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 6px; height: 96px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    cursor: pointer; margin-top: 8px;
+  }
+  .map-box-icon { font-size: 26px; }
+  .map-box span { font-size: 12px; color: var(--muted); }
+  .upload-box {
+    background: var(--bg); border: 1.5px dashed var(--border);
+    border-radius: 6px; padding: 16px 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer;
+  }
+  .upload-box-icon { font-size: 24px; }
+  .upload-box span { font-size: 12px; color: var(--muted); }
+  .date-now-row { display: flex; align-items: center; gap: 7px; margin-top: 7px; }
+  .date-now-row input { accent-color: var(--wine); }
+  .date-now-row label { font-size: 12px; color: var(--muted); cursor: pointer; }
+  .locate-row { display: flex; gap: 7px; }
+  .locate-row .mf-input { flex: 1; }
+  .btn-locate {
+    padding: 0 13px; background: var(--wine); color: #fff;
+    border: none; border-radius: 6px; font-size: 12px; font-weight: 600; font-family: inherit;
+    cursor: pointer; white-space: nowrap;
+  }
+  .legal-box {
+    background: var(--yellow-bg); border: 1px solid var(--yellow-border);
+    border-radius: 6px; padding: 13px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .legal-box input { margin-top: 2px; flex-shrink: 0; accent-color: var(--wine); }
+  .legal-box p { font-size: 12px; color: var(--yellow-text); line-height: 1.6; }
+  .legal-box strong { color: #BF360C; }
+  .anon-notice {
+    background: var(--green-bg); border: 1px solid #A5D6A7;
+    border-radius: 6px; padding: 11px 13px;
+    display: flex; gap: 9px; align-items: flex-start;
+  }
+  .anon-notice-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .anon-notice p { font-size: 12px; color: #1B5E20; line-height: 1.5; }
+  .btn-submit {
+    width: 100%; padding: 14px;
+    color: #fff; border: none; border-radius: 6px;
+    font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity .15s, transform .15s, box-shadow .15s;
+  }
+  .btn-submit:hover { opacity: .92; transform: translateY(-2px); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit.wine { background: linear-gradient(135deg, var(--wine), var(--wine-dark)); box-shadow: 0 4px 14px rgba(139,26,58,0.3); }
+  .btn-submit.wine:hover { box-shadow: 0 7px 20px rgba(139,26,58,0.4); }
+  .btn-submit.green { background: linear-gradient(135deg, #2E7D32, #1B5E20); box-shadow: 0 4px 14px rgba(46,125,50,0.3); }
+  .btn-submit.green:hover { box-shadow: 0 7px 20px rgba(46,125,50,0.4); }
+
+  /* NAV PILLS */
+  .nav-pills {
+    display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .nav-pill {
+    padding: 5px 12px; border-radius: 20px; font-size: 11px; font-family: inherit;
+    cursor: pointer; border: 1.5px solid #ccc; background: #fff; color: #555;
+    transition: all .15s;
+  }
+  .nav-pill.active { background: var(--wine); color: #fff; border-color: var(--wine); }
+</style>
+</head>
+<body>
+
+<div style="width:375px; margin: 0 auto;">
+
+  <!-- NAV PILLS -->
+  <div class="nav-pills">
+    <button class="nav-pill active" onclick="go('welcome')">Bienvenida</button>
+    <button class="nav-pill" onclick="go('register')">Registro</button>
+    <button class="nav-pill" onclick="go('home')">Home</button>
+    <button class="nav-pill" onclick="go('sos-active')">SOS activo</button>
+    <button class="nav-pill" onclick="go('formal')">Denuncia formal</button>
+    <button class="nav-pill" onclick="go('anon')">Denuncia anónima</button>
+  </div>
+
+  <div class="phone">
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+      <span>9:41</span>
+      <span>📶 🔋</span>
+    </div>
+
+    <!-- ══ WELCOME ══ -->
+    <div class="screen active" id="screen-welcome">
+      <div class="welcome-bg">
+        <div class="logo-circle">
+          <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Escudo outline -->
+            <path d="M27 5L9 13V26C9 37 17.5 47 27 50C36.5 47 45 37 45 26V13L27 5Z" stroke="white" stroke-width="2.8" stroke-linejoin="round" fill="none"/>
+            <!-- Corazón sólido -->
+            <path d="M27 38 C27 38 16 31 16 24.5 C16 20.4 19.1 17.5 22.5 17.5 C24.5 17.5 26.2 18.5 27 20 C27.8 18.5 29.5 17.5 31.5 17.5 C34.9 17.5 38 20.4 38 24.5 C38 31 27 38 27 38Z" fill="white"/>
+          </svg>
+        </div>
+        <div class="welcome-title">SafeWoman</div>
+        <div class="welcome-sub">Tu seguridad es una prioridad.<br>Estamos contigo en cada momento.</div>
+        <button class="btn-outline" onclick="go('register')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0"><polyline points="3,9 7,13.5 14,4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Ingresar como víctima
+        </button>
+        <button class="btn-outline" onclick="go('anon')">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0"><path d="M8.5 1.5L3 4v4.5C3 11.8 5.4 14.3 8.5 15c3.1-.7 5.5-3.2 5.5-6.5V4L8.5 1.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          Hacer denuncia anónima
+        </button>
+        <div class="welcome-badge">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="5.5" width="10" height="6.5" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M4 5.5V4A2.5 2.5 0 019 4v1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Plataforma segura · Ayacucho, Perú
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REGISTER ══ -->
+    <div class="screen" id="screen-register">
+      <div class="reg-top">
+        <h2>Crear cuenta</h2>
+        <p>Datos básicos de identificación</p>
+      </div>
+      <div class="reg-progress"><div class="reg-progress-fill"></div></div>
+      <div class="reg-body">
+        <div class="field-block">
+          <label class="field-label">Nombre completo <span class="req">*</span></label>
+          <input class="field-input" type="text" placeholder="Ingrese su nombre y apellidos">
+        </div>
+        <div class="field-block">
+          <label class="field-label">Número de DNI <span class="req">*</span></label>
+          <input class="field-input" type="text" placeholder="Ej. 47291034" maxlength="8">
+        </div>
+        <div class="field-block">
+          <label class="field-label">Número de celular <span class="req">*</span></label>
+          <input class="field-input" type="text" placeholder="Ej. 999 000 111">
+        </div>
+        <div class="sms-info">
+          <span class="sms-info-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M2 3h12a1 1 0 011 1v6a1 1 0 01-1 1H5L2 14V4a1 1 0 011-1z" stroke="#0C447C" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
+          <p>Se enviará un código de verificación vía SMS al número ingresado para autenticar su cuenta.</p>
+        </div>
+        <button class="btn-wine" onclick="go('home')">Crear cuenta y continuar →</button>
+        <button class="back-link" onclick="go('welcome')">← Volver</button>
+      </div>
+    </div>
+
+    <!-- ══ HOME ══ -->
+    <div class="screen" id="screen-home">
+      <div class="home-header">
+        <div style="display:flex;align-items:center;gap:11px">
+          <div class="home-avatar">MA</div>
+          <div>
+            <h3>Hola, María</h3>
+            <p>Ayacucho · Protegida</p>
+          </div>
+        </div>
+        <span class="home-header-right" style="color:#fff;display:flex;align-items:center">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="2.8" stroke="currentColor" stroke-width="1.7"/><path d="M11 3.5v1.8M11 16.7v1.8M3.5 11h1.8M16.7 11h1.8M5.8 5.8l1.3 1.3M14.9 14.9l1.3 1.3M16.2 5.8l-1.3 1.3M7.1 14.9l-1.3 1.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </span>
+      </div>
+
+      <div class="sos-zone">
+        <div class="sos-label">Emergencia</div>
+        <button class="sos-btn" onclick="go('sos-active')">
+          <span>SOS</span>
+        </button>
+        <div class="sos-hint">Mantén pulsado · Envía tu ubicación</div>
+      </div>
+
+      <div class="home-body">
+        <div class="section-title">Acciones</div>
+        <div class="action-cards">
+          <div class="action-card" onclick="go('formal')">
+            <div class="action-icon formal"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 2H5.5A1.5 1.5 0 004 3.5v11A1.5 1.5 0 005.5 16h7A1.5 1.5 0 0014 14.5V7L11 2z" stroke="#D85A30" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 2v5h3" stroke="#D85A30" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10h4M7 12.5h2.5" stroke="#D85A30" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+            <h4>Denuncia formal</h4>
+            <p>Con tu identidad, fines legales</p>
+          </div>
+          <div class="action-card" onclick="go('anon')">
+            <div class="action-icon anon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6.5" r="2.8" stroke="#0F6E56" stroke-width="1.6"/><path d="M3 16c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#0F6E56" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+            <h4>Denuncia anónima</h4>
+            <p>Sin revelar tu identidad</p>
+          </div>
+        </div>
+        <div class="section-title">Estado del sistema</div>
+        <div class="status-card">
+          <div class="status-dot"></div>
+          <p><strong>Sistema activo.</strong> GPS disponible. 3 contactos registrados.</p>
+        </div>
+      </div>
+
+      <div class="nav-tabs">
+        <button class="nav-tab active">
+          <div class="nav-tab-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 10.5L11 4l8 6.5V19a1 1 0 01-1 1H4a1 1 0 01-1-1v-8.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 20v-5.5h5V20" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+          <div class="nav-tab-label">Inicio</div>
+        </button>
+        <button class="nav-tab">
+          <div class="nav-tab-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="3" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 8h6M8 12h6M8 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <div class="nav-tab-label">Denuncias</div>
+        </button>
+        <button class="nav-tab">
+          <div class="nav-tab-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="8.5" cy="7.5" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M2 19c0-3.3 2.9-6 6.5-6s6.5 2.7 6.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15 5c1.9 0 3.5 1.6 3.5 3.5S16.9 12 15 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M18 14.5c1.5.5 2.5 1.8 2.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <div class="nav-tab-label">Contactos</div>
+        </button>
+        <button class="nav-tab">
+          <div class="nav-tab-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M4 19c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <div class="nav-tab-label">Perfil</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ SOS ACTIVO ══ -->
+    <div class="screen" id="screen-sos-active">
+      <div class="sos-active">
+        <div class="sos-ring">
+          <div class="sos-ring-inner">
+            <span>SOS</span>
+            <span>ACTIVO</span>
+          </div>
+        </div>
+        <div class="sos-active-title">¡Alerta enviada!</div>
+        <div class="sos-active-sub">Tu ubicación exacta está siendo compartida con tus contactos de emergencia y la central de monitoreo.</div>
+        <div class="sos-steps">
+          <div class="sos-step">
+            <span class="sos-step-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2C6.2 2 4 4.2 4 7c0 3.5 4 8 5 9 1-1 5-5.5 5-9 0-2.8-2.2-5-5-5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="9" cy="7" r="1.8" stroke="currentColor" stroke-width="1.5"/></svg></span>
+            <span>GPS capturado · Jr. 28 de Julio 432</span>
+          </div>
+          <div class="sos-step">
+            <span class="sos-step-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 3.5h14a1 1 0 011 1v7a1 1 0 01-1 1H5.5L2 15V4.5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
+            <span>SMS enviado a 3 contactos</span>
+          </div>
+          <div class="sos-step">
+            <span class="sos-step-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2.5C6.5 2.5 4.5 4.5 4.5 7v3.5L3 12h12l-1.5-1.5V7C13.5 4.5 11.5 2.5 9 2.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/><line x1="7.5" y1="14" x2="10.5" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+            <span>Alerta enviada a central</span>
+          </div>
+        </div>
+        <button class="btn-cancel" onclick="go('home')">Cancelar alerta</button>
+      </div>
+    </div>
+
+    <!-- ══ DENUNCIA FORMAL ══ -->
+    <div class="screen" id="screen-formal">
+      <div class="form-topbar">
+        <button class="topbar-back" onclick="go('home')">←</button>
+        <div class="topbar-info">
+          <h3>Denuncia formal</h3>
+          <p>Formulario con identidad verificada</p>
+        </div>
+        <span class="topbar-badge formal">Formal</span>
+      </div>
+      <div class="form-scroll">
+
+        <div class="form-section">
+          <div class="form-section-title" data-step="1">Datos del denunciante</div>
+          <div class="mf-group">
+            <label class="mf-label">Nombre completo <span class="req">*</span></label>
+            <input class="mf-input" type="text" placeholder="Se completa automáticamente desde su perfil">
+          </div>
+          <div class="mf-row">
+            <div class="mf-group">
+              <label class="mf-label">DNI <span class="req">*</span></label>
+              <input class="mf-input" type="text" placeholder="47291034">
+            </div>
+            <div class="mf-group">
+              <label class="mf-label">Celular <span class="req">*</span></label>
+              <input class="mf-input" type="text" placeholder="999 000 111">
+            </div>
+          </div>
+          <div class="mf-group">
+            <label class="mf-label">Foto del DNI <span class="req">*</span></label>
+            <div class="upload-box">
+              <span class="upload-box-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.7"/></svg></span>
+              <span>Tomar foto o subir imagen del DNI</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title" data-step="2">Datos del denunciado</div>
+          <div class="mf-group">
+            <label class="mf-label">Nombre del denunciado</label>
+            <div class="mf-hint">Puede incluir nombre, apellidos, alias o usuario en redes sociales.</div>
+            <input class="mf-input" type="text" placeholder="Nombre completo o alias">
+          </div>
+          <div class="mf-group">
+            <label class="mf-label">Relación con la víctima</label>
+            <select class="mf-select">
+              <option value="">Seleccione</option>
+              <option>Pareja / Expareja</option>
+              <option>Familiar</option>
+              <option>Conocido</option>
+              <option>Desconocido</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title" data-step="3">Ubicación del hecho</div>
+          <div class="mf-group">
+            <label class="mf-label">Fecha y hora <span class="req">*</span></label>
+            <div class="mf-row">
+              <input class="mf-input" type="text" placeholder="dd/mm/aaaa" id="f-fecha">
+              <input class="mf-input" type="text" placeholder="hh:mm" id="f-hora">
+            </div>
+            <div class="date-now-row">
+              <input type="checkbox" id="ahora-f" onchange="setNow('f-fecha','f-hora',this)">
+              <label for="ahora-f">Seleccionar fecha y hora actual</label>
+            </div>
+          </div>
+          <div class="mf-group">
+            <label class="mf-label">Departamento / Provincia / Distrito <span class="req">*</span></label>
+            <div class="mf-row" style="margin-bottom:8px">
+              <select class="mf-select"><option>Ayacucho</option></select>
+              <select class="mf-select"><option>Seleccione provincia</option><option>Huamanga</option></select>
+            </div>
+            <select class="mf-select"><option>Seleccione distrito</option><option>Ayacucho</option><option>Carmen Alto</option></select>
+          </div>
+          <div class="mf-group">
+            <label class="mf-label">Referencia de la ubicación</label>
+            <div class="mf-hint">Ingrese una referencia y presione "Ubicar en el mapa". Puede mover el marcador para mayor precisión.</div>
+            <div class="locate-row">
+              <input class="mf-input" type="text" placeholder="Ej. Jr. Lima cuadra 3">
+              <button class="btn-locate">Ubicar</button>
+            </div>
+            <div class="map-box">
+              <span class="map-box-icon"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><polygon points="1,4 9,2 17,6 25,4 25,22 17,22 9,18 1,20" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><line x1="9" y1="2" x2="9" y2="18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><line x1="17" y1="6" x2="17" y2="22" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+              <span>Vista del mapa (Google Maps)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title" data-step="4">Descripción de los hechos</div>
+          <div class="mf-group">
+            <label class="mf-label">Descripción detallada <span class="req">*</span></label>
+            <div class="mf-hint">Incluya nombres completos de los involucrados, características físicas, hechos ocurridos y toda información relevante.</div>
+            <textarea class="mf-input" placeholder="Describa los hechos aquí..."></textarea>
+          </div>
+          <div class="mf-group">
+            <label class="mf-label">Evidencias</label>
+            <div class="upload-box">
+              <span class="upload-box-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M19.5 10.5l-8.5 8.5a5.5 5.5 0 01-7.8-7.8l8.5-8.5a3.7 3.7 0 015.2 5.2l-8.5 8.5a1.8 1.8 0 01-2.6-2.6l7.8-7.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span>Adjuntar fotos, videos u otros archivos</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="legal-box">
+            <input type="checkbox" id="legal-chk">
+            <p><strong>Declaración jurada:</strong> Declaro que la información proporcionada es verídica. Soy consciente que presentar una denuncia falsa constituye delito penado por el Código Penal peruano (Art. 402° - 438°).</p>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <button class="btn-submit wine" onclick="go('home')">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0"><path d="M3.5 13.5l10-10M13.5 3.5H7M13.5 3.5V10" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Enviar denuncia formal
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ DENUNCIA ANÓNIMA ══ -->
+    <div class="screen" id="screen-anon">
+      <div class="form-topbar">
+        <button class="topbar-back" onclick="go('welcome')">←</button>
+        <div class="topbar-info">
+          <h3>Denuncia anónima</h3>
+          <p>Tu identidad está protegida</p>
+        </div>
+        <span class="topbar-badge anon">Anónima</span>
+      </div>
+      <div class="form-scroll">
+
+        <div class="form-section">
+          <div class="anon-notice">
+            <span class="anon-notice-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M8 1.5L2.5 4v4C2.5 11 5 13.5 8 14.5c3-1 5.5-3.5 5.5-6.5V4L8 1.5z" stroke="#1B5E20" stroke-width="1.6" stroke-linejoin="round"/><path d="M5.5 8l1.5 1.5 3-3" stroke="#1B5E20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <p>Tu identidad no será revelada. El sistema registra solo la huella del dispositivo de forma invisible para prevenir reportes falsos.</p>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title" data-step="1">Datos del denunciado</div>
+          <div class="mf-group">
+            <label class="mf-label">Nombre del denunciado</label>
+            <div class="mf-hint">Nombre, alias o usuario en redes sociales (si lo conoce).</div>
+            <input class="mf-input" type="text" placeholder="Opcional">
+          </div>
+          <div class="mf-group">
+            <label class="mf-label">Relación con la víctima</label>
+            <select class="mf-select">
+              <option value="">Seleccione</option>
+              <option>Pareja / Expareja</option>
+              <option>Familiar</option>
+              <option>Conocido</option>
+              <option>Desconocido</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title" data-step="2">Ubicación del hecho</div>
+          <div class="mf-group">
+            <label class="mf-label">Fecha y hora <span class="req">*</span></label>
+            <div class="mf-row">
+              <input class="mf-input" type="text" placeholder="dd/mm/aaaa" id="a-fecha">
+              <input class="mf-input" type="text" placeholder="hh:mm" id="a-hora">
+            </div>
+            <div class="date-now-row">
+              <input type="checkbox" id="ahora-a" onchange="setNow('a-fecha','a-hora',this)">
+              <label for="ahora-a">Seleccionar fecha y hora actual</label>
+            </div>
+          </div>
+          <div class="mf-group">
+            <label class="mf-label">Departamento / Provincia / Distrito <span class="req">*</span></label>
+            <div class="mf-row" style="margin-bottom:8px">
+              <select class="mf-select"><option>Ayacucho</option></select>
+              <select class="mf-select"><option>Seleccione provincia</option><option>Huamanga</option></select>
+            </div>
+            <select class="mf-select"><option>Seleccione distrito</option><option>Ayacucho</option><option>Carmen Alto</option></select>
+          </div>
+          <div class="mf-group">
+            <label class="mf-label">Referencia de la ubicación</label>
+            <div class="mf-hint">Ingrese una referencia y presione "Ubicar en el mapa".</div>
+            <div class="locate-row">
+              <input class="mf-input" type="text" placeholder="Calle, zona o referencia">
+              <button class="btn-locate" style="background:#2E7D32">Ubicar</button>
+            </div>
+            <div class="map-box">
+              <span class="map-box-icon"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><polygon points="1,4 9,2 17,6 25,4 25,22 17,22 9,18 1,20" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><line x1="9" y1="2" x2="9" y2="18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><line x1="17" y1="6" x2="17" y2="22" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+              <span>Vista del mapa (Google Maps)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title" data-step="3">Descripción de los hechos</div>
+          <div class="mf-group">
+            <label class="mf-label">Descripción del suceso <span class="req">*</span></label>
+            <div class="mf-hint">Describa el evento, personas involucradas y cualquier información relevante.</div>
+            <textarea class="mf-input" placeholder="Describa lo observado..."></textarea>
+          </div>
+          <div class="mf-group">
+            <label class="mf-label">Evidencias</label>
+            <div class="upload-box">
+              <span class="upload-box-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M19.5 10.5l-8.5 8.5a5.5 5.5 0 01-7.8-7.8l8.5-8.5a3.7 3.7 0 015.2 5.2l-8.5 8.5a1.8 1.8 0 01-2.6-2.6l7.8-7.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span>Adjuntar fotos, videos u archivos (opcional)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <button class="btn-submit green" onclick="go('welcome')">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0"><path d="M3.5 13.5l10-10M13.5 3.5H7M13.5 3.5V10" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Enviar denuncia anónima
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /phone -->
+</div>
+
+<script>
+  let current = 'welcome';
+
+  function go(screen) {
+    document.getElementById('screen-' + current).classList.remove('active');
+    document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+    current = screen;
+    document.getElementById('screen-' + current).classList.add('active');
+    // highlight pill
+    const map = {
+      'welcome':'Bienvenida','register':'Registro','home':'Home',
+      'sos-active':'SOS activo','formal':'Denuncia formal','anon':'Denuncia anónima'
+    };
+    document.querySelectorAll('.nav-pill').forEach(p => {
+      if (p.textContent.trim() === map[screen]) p.classList.add('active');
+    });
+    // scroll to top
+    const sc = document.querySelector('#screen-' + screen + ' .form-scroll');
+    if (sc) sc.scrollTop = 0;
+  }
+
+  function setNow(fechaId, horaId, cb) {
+    if (cb.checked) {
+      const now = new Date();
+      const d = now.getDate().toString().padStart(2,'0');
+      const m = (now.getMonth()+1).toString().padStart(2,'0');
+      const y = now.getFullYear();
+      const h = now.getHours().toString().padStart(2,'0');
+      const min = now.getMinutes().toString().padStart(2,'0');
+      document.getElementById(fechaId).value = d+'/'+m+'/'+y;
+      document.getElementById(horaId).value = h+':'+min;
+    } else {
+      document.getElementById(fechaId).value = '';
+      document.getElementById(horaId).value = '';
+    }
+  }
+</script>
+
+</body>
+</html>
