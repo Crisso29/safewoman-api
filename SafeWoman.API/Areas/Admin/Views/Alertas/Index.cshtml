@@ -90,11 +90,11 @@
                         </a>
                     </td>
                     <td style="font-size:.8rem;color:#6b7280;white-space:nowrap">
-                        @a.TimestampActivacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                        @a.TimestampActivacion.ToLimaTime().ToString("dd/MM/yyyy HH:mm")
                     </td>
                     <td style="font-size:.8rem;color:#9ca3af;white-space:nowrap">
                         @(a.TimestampCancelacion.HasValue
-                            ? a.TimestampCancelacion.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            ? a.TimestampCancelacion.Value.ToLimaTime().ToString("dd/MM/yyyy HH:mm")
                             : "—")
                     </td>
                     <td>

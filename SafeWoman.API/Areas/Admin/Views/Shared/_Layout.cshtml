@@ -512,7 +512,7 @@
             </button>
             <div class="sw-clock">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span id="sw-clock">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+                <span id="sw-clock">@DateTimeExtensions.AhoraLima().ToString("dd/MM/yyyy HH:mm")</span>
             </div>
             <div class="sw-online-pill" id="sw-online-pill" style="display:none">
                 <span class="sw-online-dot"></span>

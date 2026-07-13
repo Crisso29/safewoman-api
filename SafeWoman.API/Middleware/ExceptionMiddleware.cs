@@ -35,7 +35,7 @@ public class ExceptionMiddleware
         catch (DomainException ex)
         {
             await WriteProblemAsync(context, HttpStatusCode.BadRequest,
-                "Solicitud inválida", ex.Message);
+                "Solicitud inválida", ex.Message, ex.Code);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -79,7 +79,8 @@ public class ExceptionMiddleware
         }
     }
 
-    private Task WriteProblemAsync(HttpContext ctx, HttpStatusCode status, string title, string detail)
+    private Task WriteProblemAsync(HttpContext ctx, HttpStatusCode status,
+        string title, string detail, string? code = null)
     {
         if (ctx.Response.HasStarted)
             return Task.CompletedTask;
@@ -95,6 +96,13 @@ public class ExceptionMiddleware
             Detail   = detail,
             Instance = ctx.Request.Path
         };
+
+        // El código estable de error se serializa como un campo top-level "code"
+        // por el JSON serializer de ProblemDetails.Extensions. El frontend móvil
+        // puede reaccionar por code (ej. redirigir a login si ACCOUNT_ALREADY_VERIFIED)
+        // en vez de hacer string matching sobre el detail.
+        if (!string.IsNullOrEmpty(code))
+            problem.Extensions["code"] = code;
 
         return ctx.Response.WriteAsync(JsonSerializer.Serialize(problem, JsonOpts));
     }

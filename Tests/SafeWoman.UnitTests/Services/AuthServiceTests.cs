@@ -68,9 +68,12 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task RegistrarAsync_con_DNI_ya_existente_debe_lanzar_DomainException()
+    public async Task RegistrarAsync_con_DNI_ya_verificado_debe_lanzar_DomainException_con_codigo()
     {
+        // Solo bloqueamos si la cuenta previa ya está verificada — es una cuenta real.
         var existente = Victima.Crear("Otra", "12345678", "+51999888777", "hash");
+        existente.Verificar();
+
         _victimaRepo
             .Setup(r => r.FindAsync(It.IsAny<Expression<Func<Victima, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[] { existente });
@@ -80,8 +83,41 @@ public class AuthServiceTests
 
         var act = () => sut.RegistrarAsync(req);
 
-        await act.Should().ThrowAsync<DomainException>()
-            .WithMessage("*Ya existe una cuenta*");
+        var ex = await act.Should().ThrowAsync<DomainException>()
+            .WithMessage("*Ya existe una cuenta verificada*");
+        // El código debe estar presente para que el frontend móvil pueda redirigir al login.
+        ex.Which.Code.Should().Be(SafeWoman.Domain.Exceptions.ErrorCodes.ACCOUNT_ALREADY_VERIFIED);
+    }
+
+    [Fact]
+    public async Task RegistrarAsync_con_cuenta_previa_no_verificada_debe_eliminarla_y_crear_una_nueva()
+    {
+        // Escenario: la usuaria intentó registrarse antes pero abandonó / se equivocó de
+        // teléfono / no recibió el SMS. La cuenta zombie debe eliminarse y permitirle
+        // reiniciar limpio, no quedar bloqueada por los índices únicos.
+        var zombie = Victima.Crear("Ana Vieja", "12345678", "+51987654321", "hash-viejo");
+        // NO llamamos Verificar() → sigue como zombie
+
+        _victimaRepo
+            .Setup(r => r.FindAsync(It.IsAny<Expression<Func<Victima, bool>>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { zombie });
+        _hasher.Setup(h => h.Hash("nueva-pass")).Returns("hash-nuevo");
+        _otpGen.Setup(g => g.Generate()).Returns("123456");
+
+        var sut = CrearSut();
+        var req = new RegistroRequest("Ana Nueva", "12345678", "+51987654321", "nueva-pass");
+
+        await sut.RegistrarAsync(req);
+
+        // Se eliminó la cuenta zombie
+        _victimaRepo.Verify(r => r.Remove(zombie), Times.Once,
+            "la cuenta previa no verificada debe eliminarse antes de crear la nueva");
+        // Se creó la nueva víctima
+        _victimaRepo.Verify(r => r.AddAsync(
+            It.Is<Victima>(v => v.NombreCompleto == "Ana Nueva" && v.PasswordHash == "hash-nuevo"),
+            It.IsAny<CancellationToken>()), Times.Once);
+        // Se envió el nuevo SMS
+        _otpSender.Verify(s => s.SendOtpAsync("+51987654321", "123456", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

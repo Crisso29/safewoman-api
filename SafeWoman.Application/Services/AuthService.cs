@@ -36,10 +36,26 @@ public class AuthService
 
     public async Task<int> RegistrarAsync(RegistroRequest req, CancellationToken ct = default)
     {
-        var existente = await _victimaRepo.FindAsync(
+        // Buscamos cualquier cuenta con el mismo DNI o teléfono (índices únicos en BD).
+        var existentes = await _victimaRepo.FindAsync(
             v => v.Dni == req.Dni || v.Telefono == req.Telefono, ct);
-        if (existente.Any())
-            throw new DomainException("Ya existe una cuenta registrada con ese DNI o teléfono.");
+        var existente = existentes.FirstOrDefault();
+
+        if (existente is not null)
+        {
+            // Ya verificada → bloqueamos y guiamos al login.
+            if (existente.Verificada)
+                throw new DomainException(
+                    ErrorCodes.ACCOUNT_ALREADY_VERIFIED,
+                    "Ya existe una cuenta verificada con ese DNI o teléfono. Inicia sesión.");
+
+            // No verificada → la usuaria abandonó el flujo, se equivocó de teléfono
+            // o nunca recibió el SMS. Eliminamos la cuenta vieja para que pueda
+            // registrarse limpio sin quedar atrapada por los índices únicos.
+            // La cascade en OtpVerificacion elimina también los códigos pendientes.
+            _victimaRepo.Remove(existente);
+            await _uow.SaveChangesAsync(ct);
+        }
 
         var hash    = _hasher.Hash(req.Password);
         var victima = Victima.Crear(req.NombreCompleto, req.Dni, req.Telefono, hash);
@@ -76,14 +92,14 @@ public class AuthService
     {
         var victimas = await _victimaRepo.FindAsync(v => v.Telefono == req.Telefono, ct);
         var victima  = victimas.FirstOrDefault()
-            ?? throw new DomainException("Número de teléfono no encontrado.");
+            ?? throw new DomainException(ErrorCodes.PHONE_NOT_FOUND, "Número de teléfono no encontrado.");
 
         var otps = await _otpRepo.FindAsync(o => o.IdVictima == victima.IdVictima && !o.Usado, ct);
         var otp  = otps.OrderByDescending(o => o.FechaGeneracion).FirstOrDefault()
-            ?? throw new DomainException("No hay código OTP pendiente.");
+            ?? throw new DomainException(ErrorCodes.OTP_NOT_FOUND, "No hay código OTP pendiente.");
 
         if (!otp.EsValido(req.Codigo))
-            throw new DomainException("Código inválido o expirado.");
+            throw new DomainException(ErrorCodes.OTP_INVALID, "Código inválido o expirado.");
 
         otp.Consumir();
         victima.Verificar();
@@ -110,13 +126,15 @@ public class AuthService
         var victimas = await _victimaRepo.FindAsync(
             v => v.Telefono == req.Identificador || v.Dni == req.Identificador, ct);
         var victima  = victimas.FirstOrDefault()
-            ?? throw new DomainException("Credenciales incorrectas.");
+            ?? throw new DomainException(ErrorCodes.INVALID_CREDENTIALS, "Credenciales incorrectas.");
 
         if (!victima.Verificada)
-            throw new DomainException("La cuenta aún no está verificada. Revise su SMS.");
+            throw new DomainException(
+                ErrorCodes.ACCOUNT_NOT_VERIFIED,
+                "La cuenta aún no está verificada. Revise su SMS.");
 
         if (!_hasher.Verify(req.Password, victima.PasswordHash))
-            throw new DomainException("Credenciales incorrectas.");
+            throw new DomainException(ErrorCodes.INVALID_CREDENTIALS, "Credenciales incorrectas.");
 
         return new AuthResponse(
             _tokenService.GenerateVictimaToken(victima),
@@ -131,7 +149,7 @@ public class AuthService
     {
         var victimas = await _victimaRepo.FindAsync(v => v.Telefono == telefono, ct);
         var victima  = victimas.FirstOrDefault()
-            ?? throw new DomainException("Teléfono no registrado.");
+            ?? throw new DomainException(ErrorCodes.PHONE_NOT_FOUND, "Teléfono no registrado.");
 
         var codigo = _otpGenerator.Generate();
         var otp    = OtpVerificacion.Crear(victima.IdVictima, codigo);

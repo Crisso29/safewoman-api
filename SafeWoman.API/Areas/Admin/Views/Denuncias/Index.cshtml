@@ -170,7 +170,7 @@
                                 @(d.FechaHecho.HasValue ? d.FechaHecho.Value.ToString("dd/MM/yyyy") : "—")
                             </td>
                             <td style="font-size:.78rem;color:#6b7280;white-space:nowrap">
-                                @d.FechaEnvio.ToLocalTime().ToString("dd/MM/yy HH:mm")
+                                @d.FechaEnvio.ToLimaTime().ToString("dd/MM/yy HH:mm")
                             </td>
                             <td>
                                 <span class="sw-badge @EstadoCss(d.Estado)">
@@ -257,7 +257,7 @@
                                     @(d.FechaHecho.HasValue ? d.FechaHecho.Value.ToString("dd/MM/yyyy") : "—")
                                 </td>
                                 <td style="font-size:.78rem;color:#6b7280;white-space:nowrap">
-                                    @d.FechaEnvio.ToLocalTime().ToString("dd/MM/yy HH:mm")
+                                    @d.FechaEnvio.ToLimaTime().ToString("dd/MM/yy HH:mm")
                                 </td>
                                 <td>
                                     <span class="sw-badge @EstadoCss(d.Estado)">

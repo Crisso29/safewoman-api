@@ -79,7 +79,7 @@ jobs:
   # 2️⃣ UNIT TESTS — sin infraestructura, muy rápido
   # ───────────────────────────────────────────────────────────────────────────
   unit-tests:
-    name: 🧪 Unit tests (158)
+    name: 🧪 Unit tests (159)
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -161,7 +161,7 @@ jobs:
   # 4️⃣ API TESTS — pipeline HTTP end-to-end + Postgres
   # ───────────────────────────────────────────────────────────────────────────
   api-tests:
-    name: 🌐 API tests (18)
+    name: 🌐 API tests (19)
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -230,7 +230,7 @@ jobs:
             -targetdir:"CoverageReport" \
             -reporttypes:"Html;MarkdownSummaryGithub" \
             -assemblyfilters:"+SafeWoman.Domain;+SafeWoman.Application;+SafeWoman.Infrastructure;+SafeWoman.API" \
-            -classfilters:"-*.DTOs.*;-*DependencyInjection;-*Migrations*;-*Configurations*;-*Program;-*SosHub;-*Areas.Admin*;-*Controllers.*Controller;-*Middleware.*;-*DbSeeder;-*SafeWomanDbContext;-*Repository*;-*UnitOfWork;-*TwilioSmsSender;-*ConsoleSmsSender;-*NominatimReverseGeocoder;-*SignalRSosNotifier;-*LocalFileStorage;-*AdminService"
+            -classfilters:"-*.DTOs.*;-*DependencyInjection;-*Migrations*;-*Configurations*;-*Program;-*SosHub;-*Areas.Admin*;-*Controllers.*Controller;-*Middleware.*;-*DbSeeder;-*SafeWomanDbContext;-*Repository*;-*UnitOfWork;-*TwilioSmsSender;-*ConsoleSmsSender;-*NominatimReverseGeocoder;-*SignalRSosNotifier;-*LocalFileStorage;-*AdminService;-*DateTimeExtensions;-*UnverifiedAccountsCleanupService;-*ErrorCodes"
 
       - name: Publish coverage HTML as artifact
         uses: actions/upload-artifact@v4

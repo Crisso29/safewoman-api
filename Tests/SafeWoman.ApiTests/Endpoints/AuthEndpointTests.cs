@@ -67,18 +67,53 @@ public class AuthEndpointTests
     }
 
     [Fact]
-    public async Task POST_registro_con_DNI_duplicado_debe_devolver_400()
+    public async Task POST_registro_con_DNI_de_cuenta_YA_VERIFICADA_debe_devolver_400()
     {
+        // Contrato de negocio: solo bloqueamos duplicados si la cuenta previa
+        // ya está verificada (es una usuaria real). Las cuentas huérfanas
+        // sin verificar se reemplazan — ver test siguiente.
         var client = _factory.CreateClient();
-        var body1  = new RegistroRequest("Ana", "12345678", "987654321", "Password123!");
-        var body2  = new RegistroRequest("Bea", "12345678", "988888888", "Password123!");
 
-        var r1 = await client.PostAsJsonAsync("/api/auth/registro", body1);
-        r1.EnsureSuccessStatusCode();
+        // 1. Registrar + VERIFICAR la primera cuenta
+        var telefono1 = "987654321";
+        var body1 = new RegistroRequest("Ana", "12345678", telefono1, "Password123!");
+        (await client.PostAsJsonAsync("/api/auth/registro", body1)).EnsureSuccessStatusCode();
+        var otp = await LeerOtpDirectoDeBd(telefono1);
+        (await client.PostAsJsonAsync("/api/auth/verificar-otp",
+            new VerificarOtpRequest(telefono1, otp!))).EnsureSuccessStatusCode();
+
+        // 2. Intento duplicar el DNI con otra usuaria
+        var body2 = new RegistroRequest("Bea", "12345678", "988888888", "Password123!");
         var r2 = await client.PostAsJsonAsync("/api/auth/registro", body2);
 
         r2.StatusCode.Should().Be(HttpStatusCode.BadRequest,
-            "no debe permitirse registrar dos víctimas con el mismo DNI");
+            "no debe permitirse registrar sobre una cuenta ya verificada");
+
+        // El body debe traer el código estable para que el frontend redirija al login.
+        var json = await r2.Content.ReadAsStringAsync();
+        json.Should().Contain("ACCOUNT_ALREADY_VERIFIED");
+    }
+
+    [Fact]
+    public async Task POST_registro_sobre_cuenta_NO_VERIFICADA_debe_reemplazarla_y_devolver_200()
+    {
+        // Contrato de negocio: si la cuenta previa nunca completó la verificación
+        // OTP (usuaria abandonó o se equivocó de teléfono), debe poder registrar
+        // limpio sin quedar atrapada por los índices únicos de DNI/Teléfono.
+        var client = _factory.CreateClient();
+        var dni = "77777777";
+        var tel = "955555555";
+
+        // 1. Registro inicial (no verificamos OTP)
+        var body1 = new RegistroRequest("Ana Vieja", dni, tel, "Password123!");
+        (await client.PostAsJsonAsync("/api/auth/registro", body1)).EnsureSuccessStatusCode();
+
+        // 2. Segundo intento con MISMOS DNI/tel — debe reemplazar el registro previo
+        var body2 = new RegistroRequest("Ana Nueva", dni, tel, "OtherPass456!");
+        var r2 = await client.PostAsJsonAsync("/api/auth/registro", body2);
+
+        r2.StatusCode.Should().Be(HttpStatusCode.OK,
+            "una cuenta previa NO verificada debe eliminarse y permitir re-registro");
     }
 
     [Fact]

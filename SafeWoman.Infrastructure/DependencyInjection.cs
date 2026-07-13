@@ -7,6 +7,7 @@ using SafeWoman.Infrastructure.Services.Admin;
 using SafeWoman.Domain.Interfaces;
 using SafeWoman.Infrastructure.Persistence;
 using SafeWoman.Infrastructure.Persistence.Repositories;
+using SafeWoman.Infrastructure.Services.Cleanup;
 using SafeWoman.Infrastructure.Services.Realtime;
 using SafeWoman.Infrastructure.Services.Security;
 using SafeWoman.Infrastructure.Services.Sms;
@@ -84,6 +85,12 @@ public static class DependencyInjection
 
         // ── Servicios del panel Admin ─────────────────────────────────────────
         services.AddScoped<IAdminService, AdminService>();
+
+        // ── Background services ──────────────────────────────────────────────
+        // Purga automática de cuentas no verificadas (defaults: cada 15 min,
+        // borra cuentas > 1 h sin verificar). Configurable en appsettings via
+        // Cleanup:IntervalMinutes y Cleanup:UnverifiedAccountsHours.
+        services.AddHostedService<UnverifiedAccountsCleanupService>();
 
         return services;
     }

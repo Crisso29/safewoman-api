@@ -77,10 +77,10 @@
                 <tr class="sw-log-row" data-name="@((l.NombreAdmin ?? "sistema").ToLower()) @((l.Accion ?? "").ToLower())">
                     <td style="white-space:nowrap">
                         <div style="font-size:.82rem;font-weight:600;color:#374151">
-                            @l.Timestamp.ToLocalTime().ToString("dd/MM/yyyy")
+                            @l.Timestamp.ToLimaTime().ToString("dd/MM/yyyy")
                         </div>
                         <div style="font-size:.75rem;color:#9ca3af">
-                            @l.Timestamp.ToLocalTime().ToString("HH:mm:ss")
+                            @l.Timestamp.ToLimaTime().ToString("HH:mm:ss")
                         </div>
                     </td>
                     <td>
